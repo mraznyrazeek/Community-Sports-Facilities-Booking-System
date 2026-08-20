@@ -1,0 +1,4 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<oracle.dbtools.crest.model.design.relational.RelationalDesign>
+   <object objectType="main_view" objectID="EAE10F95-E4A3-0120-0FA7-A27F2C206689" name="Sports_Booking_Relational_Model" visible="true"/>
+</oracle.dbtools.crest.model.design.relational.RelationalDesign>

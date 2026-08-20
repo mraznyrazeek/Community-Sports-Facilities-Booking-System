@@ -1,0 +1,339 @@
+============================================================
+COMMUNITY SPORTS FACILITIES BOOKING SYSTEM
+ORACLE DATABASE SETUP GUIDE
+============================================================
+
+PROJECT DATABASE:
+Oracle Database 21c Express Edition (XE)
+
+TOOLS:
+- Oracle Database 21c XE
+- Oracle SQL Developer
+- Oracle SQL Developer Data Modeler
+
+============================================================
+1. INSTALL ORACLE AND SQL DEVELOPER
+============================================================
+
+On a new computer, install:
+
+1. Oracle Database 21c Express Edition (XE)
+2. Oracle SQL Developer
+
+Oracle XE normally provides the XEPDB1 pluggable database.
+
+Make sure the Oracle database services are running before
+continuing.
+
+============================================================
+2. CREATE THE PROJECT DATABASE USER
+============================================================
+
+IMPORTANT:
+Every computer has its own Oracle Database.
+
+The SPORTS_BOOKING user from the original computer does NOT
+automatically exist on another computer.
+
+Create the project user locally.
+
+Open Command Prompt and run:
+
+sqlplus / as sysdba
+
+Then run these commands IN THIS EXACT ORDER:
+
+ALTER SESSION SET CONTAINER = XEPDB1;
+
+CREATE USER SPORTS_BOOKING IDENTIFIED BY SportsBooking123;
+
+GRANT CONNECT, RESOURCE TO SPORTS_BOOKING;
+
+The first command automatically switches the session to
+XEPDB1.
+
+You do NOT need to manually select XEPDB1.
+
+The SPORTS_BOOKING user is therefore created inside XEPDB1.
+
+============================================================
+3. PROJECT DATABASE LOGIN
+============================================================
+
+Use these credentials for the project:
+
+Username:
+SPORTS_BOOKING
+
+Password:
+SportsBooking123
+
+Hostname:
+localhost
+
+Port:
+1521
+
+Service Name:
+XEPDB1
+
+============================================================
+4. CREATE THE SQL DEVELOPER CONNECTION
+============================================================
+
+Open Oracle SQL Developer.
+
+Create a new database connection.
+
+Connection Name:
+Sports Booking
+
+Username:
+SPORTS_BOOKING
+
+Password:
+SportsBooking123
+
+Connection Type:
+Basic
+
+Hostname:
+localhost
+
+Port:
+1521
+
+Service Name:
+XEPDB1
+
+Click TEST.
+
+The connection should show:
+
+Status: Success
+
+Then click CONNECT.
+
+============================================================
+5. DATABASE MODEL
+============================================================
+
+The database design was created using Oracle SQL Developer
+Data Modeler.
+
+Model file:
+
+Sports_Booking_System.dmd
+
+Relational model:
+
+Sports_Booking_Relational_Model
+
+The model contains 7 tables:
+
+1. SPORT
+2. FACILITY
+3. MEMBER
+4. MEMBER_SPORT
+5. BOOKING
+6. REVIEW
+7. INQUIRY
+
+The model contains the primary keys and foreign-key
+relationships between these tables.
+
+============================================================
+6. SQL SCRIPT GENERATED FROM THE MODEL
+============================================================
+
+The SQL script generated from the relational model is:
+
+Sports_Booking_Database.sql
+
+This script contains the SQL required to create the actual
+Oracle database tables and constraints.
+
+The .dmd file = database design/model
+
+The .sql file = SQL used to create the database structure
+
+KEEP BOTH FILES WITH THE PROJECT.
+
+============================================================
+7. CREATE THE TABLES
+============================================================
+
+After creating the SPORTS_BOOKING connection:
+
+1. Open Oracle SQL Developer.
+2. Connect to the SPORTS_BOOKING connection.
+3. Open:
+
+   Sports_Booking_Database.sql
+
+4. Make sure the SQL worksheet is connected to:
+
+   SPORTS_BOOKING
+
+5. Press:
+
+   F5
+
+F5 = Run Script
+
+The SQL script will create the project tables and their
+constraints.
+
+============================================================
+8. CHECK THE TABLES
+============================================================
+
+After the SQL script finishes:
+
+1. Expand the SPORTS_BOOKING connection.
+2. Find the "Tables" section.
+3. Right-click "Tables".
+4. Select "Refresh".
+
+The following tables should appear:
+
+BOOKING
+FACILITY
+INQUIRY
+MEMBER
+MEMBER_SPORT
+REVIEW
+SPORT
+
+============================================================
+9. OPEN THE DATA MODEL
+============================================================
+
+To open the database model:
+
+1. Open Oracle SQL Developer.
+2. Open the Data Modeler.
+3. Open:
+
+   Sports_Booking_System.dmd
+
+The relational model should show:
+
+SPORT
+FACILITY
+MEMBER
+MEMBER_SPORT
+BOOKING
+REVIEW
+INQUIRY
+
+along with their relationships.
+
+============================================================
+10. IMPORTANT FILES
+============================================================
+
+Keep these files in the project:
+
+Sports_Booking_System.dmd
+Sports_Booking_Database.sql
+
+Sports_Booking_System.dmd
+--------------------------------
+Contains:
+- Database design
+- Tables
+- Columns
+- Primary keys
+- Foreign keys
+- Relationships
+- Relational model
+
+Sports_Booking_Database.sql
+--------------------------------
+Contains:
+- CREATE TABLE statements
+- Primary key constraints
+- Foreign key constraints
+- Other database constraints
+
+============================================================
+11. SETUP SUMMARY FOR A NEW COMPUTER
+============================================================
+
+Install:
+1. Oracle Database 21c XE
+2. Oracle SQL Developer
+
+Then open Command Prompt:
+
+sqlplus / as sysdba
+
+Run:
+
+ALTER SESSION SET CONTAINER = XEPDB1;
+
+CREATE USER SPORTS_BOOKING IDENTIFIED BY SportsBooking123;
+
+GRANT CONNECT, RESOURCE TO SPORTS_BOOKING;
+
+Then create the SQL Developer connection:
+
+Username: SPORTS_BOOKING
+Password: SportsBooking123
+Hostname: localhost
+Port: 1521
+Service Name: XEPDB1
+
+Then:
+
+1. Open Sports_Booking_Database.sql
+2. Connect it to SPORTS_BOOKING
+3. Press F5
+4. Refresh Tables
+5. Confirm all 7 tables exist
+
+============================================================
+12. IF SPORTS_BOOKING ALREADY EXISTS
+============================================================
+
+If the user already exists on the computer, do NOT run
+CREATE USER again.
+
+Instead run:
+
+sqlplus / as sysdba
+
+ALTER SESSION SET CONTAINER = XEPDB1;
+
+ALTER USER SPORTS_BOOKING IDENTIFIED BY SportsBooking123;
+
+Then use:
+
+Username: SPORTS_BOOKING
+Password: SportsBooking123
+Service Name: XEPDB1
+
+============================================================
+IMPORTANT
+============================================================
+
+The project database user is created separately on each
+computer.
+
+The username/password do not automatically transfer between
+computers.
+
+The same project credentials can be used on each computer:
+
+Username: SPORTS_BOOKING
+Password: SportsBooking123
+
+The database itself is local to each computer.
+
+The .dmd model and .sql script are what allow the project
+database structure to be recreated on another computer.
+
+============================================================
+END OF SETUP GUIDE
+============================================================

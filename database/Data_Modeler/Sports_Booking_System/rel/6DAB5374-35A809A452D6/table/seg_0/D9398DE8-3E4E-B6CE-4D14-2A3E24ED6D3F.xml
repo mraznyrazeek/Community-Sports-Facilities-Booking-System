@@ -1,0 +1,101 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="D9398DE8-3E4E-B6CE-4D14-2A3E24ED6D3F" name="MEMBER">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 15:41:03 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<ordsAlias>table_14</ordsAlias>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="MEMBER_ID" id="5D880D84-031E-67A8-FF1C-1C535A030F35">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 15:48:44 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="NAME" id="39C18531-3B58-6A00-2F8A-43EEA3E79664">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 15:48:44 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>100</dataTypeSize>
+<ownDataTypeParameters>100,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="EMAIL" id="B159F6BA-0061-999E-6FCF-1C39EBF1CFD8">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 15:48:44 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>150</dataTypeSize>
+<ownDataTypeParameters>150,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="PHONE" id="EB6E2B7A-5E34-0BE2-554F-3173482D2576">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 15:48:44 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>20</dataTypeSize>
+<ownDataTypeParameters>20,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="PASSWORD" id="7C2D1B48-22B5-6C5C-B2F1-898A3929045E">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 15:48:44 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>255</dataTypeSize>
+<ownDataTypeParameters>255,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="STATUS" id="A8E72F47-023D-F1F9-5E19-BF02DBC8A562">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 15:48:44 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>20</dataTypeSize>
+<ownDataTypeParameters>20,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="CREATED_AT" id="75BD44AB-B33E-61C7-8217-5D21332606F5">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 15:48:44 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT015</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="0411D824-A295-A2F4-F466-761564BC6C6B" name="PK_MEMBER_ID">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 15:48:44 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="5D880D84-031E-67A8-FF1C-1C535A030F35"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

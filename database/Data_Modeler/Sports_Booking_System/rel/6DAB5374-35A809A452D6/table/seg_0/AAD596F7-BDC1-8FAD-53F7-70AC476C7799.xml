@@ -1,0 +1,68 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="AAD596F7-BDC1-8FAD-53F7-70AC476C7799" name="SPORT">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 14:24:41 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<ordsAlias>table_7</ordsAlias>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="SPORT_ID" id="4BC5B1D6-A631-01A0-D8BA-0453BA04C678">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 14:35:58 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="SPORT_NAME" id="A9A3DA9C-B8A2-4829-A108-1098065269E6">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 14:35:58 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>50</dataTypeSize>
+<ownDataTypeParameters>50,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="DESCRIPTION" id="BBF32B3F-4B74-20DC-A69F-0D59691F6C87">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 14:35:58 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>255</dataTypeSize>
+<ownDataTypeParameters>255,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="6EC1E44F-D9BB-07B6-CA5D-B1B291098A72" name="PK_SPORT">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 14:35:58 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="4BC5B1D6-A631-01A0-D8BA-0453BA04C678"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="9DD6D3B0-72CA-29E5-DFCF-6ACE4835D2F9" name="UQ_SPORT_NAME">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-20 14:35:58 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System</ownerDesignName>
+<indexState>Unique Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="A9A3DA9C-B8A2-4829-A108-1098065269E6"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>
