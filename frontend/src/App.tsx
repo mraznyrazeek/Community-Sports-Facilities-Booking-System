@@ -33,9 +33,7 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* =========================
-            PUBLIC ROUTES
-        ========================== */}
+        {/* PUBLIC ROUTES */}
 
         <Route
           path="/login"
@@ -47,9 +45,7 @@ function App() {
           element={<Register />}
         />
 
-        {/* =========================
-            PROTECTED ROUTES
-        ========================== */}
+        {/* PROTECTED ROUTES */}
 
         <Route
           path="/dashboard"
@@ -123,9 +119,7 @@ function App() {
           }
         />
 
-        {/* =========================
-            DEFAULT ROUTE
-        ========================== */}
+        {/* DEFAULT ROUTE */}
 
         <Route
           path="/"
@@ -137,9 +131,7 @@ function App() {
           }
         />
 
-        {/* =========================
-            UNKNOWN ROUTES
-        ========================== */}
+        {/* UNKNOWN ROUTES */}
 
         <Route
           path="*"
