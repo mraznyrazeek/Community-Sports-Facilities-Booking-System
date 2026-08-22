@@ -62,7 +62,8 @@ public partial class SportsBookingDbContext : DbContext
 
         modelBuilder.Entity<Member>(entity =>
         {
-            entity.HasKey(e => e.MemberId).HasName("PK_MEMBER_ID");
+            entity.HasKey(e => e.MemberId)
+                .HasName("PK_MEMBER_ID");
         });
 
         modelBuilder.Entity<MemberSport>(entity =>
@@ -85,6 +86,15 @@ public partial class SportsBookingDbContext : DbContext
             entity.HasOne(d => d.Member).WithMany(p => p.Reviews)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("REVIEW_MEMBER_FK");
+        });
+
+        // Sport configuration
+        modelBuilder.Entity<Sport>(entity =>
+        {
+            entity.HasKey(e => e.SportId);
+
+            entity.Property(e => e.SportId)
+                .ValueGeneratedNever();
         });
 
         OnModelCreatingPartial(modelBuilder);

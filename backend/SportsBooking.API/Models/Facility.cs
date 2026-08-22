@@ -59,5 +59,5 @@ public partial class Facility
 
     [ForeignKey("SportId")]
     [InverseProperty("Facilities")]
-    public virtual Sport Sport { get; set; } = null!;
+    public virtual Sport? Sport { get; set; }
 }

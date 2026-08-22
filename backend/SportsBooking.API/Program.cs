@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Oracle.EntityFrameworkCore;
 using SportsBooking.API.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,7 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<SportsBookingDbContext>(options =>
     options.UseOracle(
-        builder.Configuration.GetConnectionString("OracleConnection")
+        builder.Configuration.GetConnectionString("OracleConnection"),
+        oracleOptions =>
+        {
+            oracleOptions.UseOracleSQLCompatibility(
+                OracleSQLCompatibility.DatabaseVersion19);
+        }
     ));
 
 builder.Services.AddControllers();
