@@ -461,5 +461,35 @@ namespace SportsBooking.API.Controllers
             return Ok(bookings);
         }
 
+        // PUT: api/Bookings/1/cancel
+        [HttpPut("{id}/cancel")]
+        public async Task<IActionResult> CancelBooking(decimal id)
+        {
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.BookingId == id);
+
+            if (booking == null)
+            {
+                return NotFound("Booking does not exist.");
+            }
+
+            // Already cancelled
+            if (booking.Status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest("This booking is already cancelled.");
+            }
+
+            booking.Status = "Cancelled";
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Booking cancelled successfully.",
+                bookingId = booking.BookingId,
+                status = booking.Status
+            });
+        }
+
     }
 }
