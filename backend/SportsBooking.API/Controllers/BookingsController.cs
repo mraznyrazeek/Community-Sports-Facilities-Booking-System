@@ -410,5 +410,56 @@ namespace SportsBooking.API.Controllers
             return Ok(bookings);
         }
 
+        // GET: api/Bookings/facility/1
+        [HttpGet("facility/{facilityId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetFacilityBookings(
+            decimal facilityId)
+        {
+            // Check facility exists
+            var facilityExists = await _context.Facilities
+                .AnyAsync(f => f.FacilityId == facilityId);
+
+            if (!facilityExists)
+            {
+                return NotFound("Facility does not exist.");
+            }
+
+            var bookings = await _context.Bookings
+                .Include(b => b.Member)
+                .Include(b => b.Facility)
+                .Where(b => b.FacilityId == facilityId)
+                .OrderByDescending(b => b.BookingDate)
+                .ThenBy(b => b.StartTime)
+                .Select(b => new
+                {
+                    bookingId = b.BookingId,
+                    memberId = b.MemberId,
+                    facilityId = b.FacilityId,
+                    bookingDate = b.BookingDate,
+                    startTime = b.StartTime,
+                    endTime = b.EndTime,
+                    status = b.Status,
+                    createdAt = b.CreatedAt,
+
+                    member = b.Member == null ? null : new
+                    {
+                        memberId = b.Member.MemberId,
+                        name = b.Member.Name,
+                        email = b.Member.Email,
+                        phone = b.Member.Phone
+                    },
+
+                    facility = b.Facility == null ? null : new
+                    {
+                        facilityId = b.Facility.FacilityId,
+                        facilityName = b.Facility.FacilityName,
+                        location = b.Facility.Location
+                    }
+                })
+                .ToListAsync();
+
+            return Ok(bookings);
+        }
+
     }
 }
