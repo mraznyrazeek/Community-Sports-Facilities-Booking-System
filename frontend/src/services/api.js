@@ -1,7 +1,6 @@
-const API_BASE_URL = "https://localhost:5001/api";
-// If your Swagger API uses a different port, change it here.
-// Example: http://localhost:5000/api
+const API_BASE_URL = "https://localhost:7252/api";
 
+// AUTH HELPERS
 const getToken = () => {
   return localStorage.getItem("token");
 };
@@ -18,17 +17,25 @@ const request = async (endpoint, options = {}) => {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  let response;
 
-  // Handle empty responses such as 204 No Content
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
+  } catch (error) {
+    throw new Error(
+      "Unable to connect to the API. Make sure the backend is running."
+    );
+  }
+
+  // 204 No Content
   if (response.status === 204) {
     return null;
   }
 
-  let data;
+  let data = null;
 
   try {
     data = await response.json();
@@ -36,6 +43,24 @@ const request = async (endpoint, options = {}) => {
     data = null;
   }
 
+  // Unauthorized
+  if (response.status === 401) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("member");
+
+    throw new Error(
+      "Your session has expired. Please log in again."
+    );
+  }
+
+  // Forbidden
+  if (response.status === 403) {
+    throw new Error(
+      "You do not have permission to perform this action."
+    );
+  }
+
+  // Other errors
   if (!response.ok) {
     let message = "Something went wrong.";
 
@@ -45,6 +70,8 @@ const request = async (endpoint, options = {}) => {
       message = data.message;
     } else if (data?.title) {
       message = data.title;
+    } else if (data?.errors) {
+      message = "Please check the information you entered.";
     }
 
     throw new Error(message);
@@ -53,15 +80,14 @@ const request = async (endpoint, options = {}) => {
   return data;
 };
 
-
 // AUTH
-
 export const register = async (userData) => {
   return request("/Auth/register", {
     method: "POST",
     body: JSON.stringify(userData),
   });
 };
+
 
 export const login = async (credentials) => {
   const data = await request("/Auth/login", {
@@ -71,16 +97,24 @@ export const login = async (credentials) => {
 
   if (data?.token) {
     localStorage.setItem("token", data.token);
-    localStorage.setItem("member", JSON.stringify(data.member));
+  }
+
+  if (data?.member) {
+    localStorage.setItem(
+      "member",
+      JSON.stringify(data.member)
+    );
   }
 
   return data;
 };
 
+
 export const logout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("member");
 };
+
 
 export const getCurrentMember = () => {
   const member = localStorage.getItem("member");
@@ -92,20 +126,21 @@ export const getCurrentMember = () => {
   }
 };
 
+
 export const isAuthenticated = () => {
   return !!localStorage.getItem("token");
 };
 
-
 // SPORTS
-
 export const getSports = () => {
   return request("/Sports");
 };
 
+
 export const getSport = (id) => {
   return request(`/Sports/${id}`);
 };
+
 
 export const createSport = (sport) => {
   return request("/Sports", {
@@ -114,6 +149,7 @@ export const createSport = (sport) => {
   });
 };
 
+
 export const updateSport = (id, sport) => {
   return request(`/Sports/${id}`, {
     method: "PUT",
@@ -121,22 +157,23 @@ export const updateSport = (id, sport) => {
   });
 };
 
+
 export const deleteSport = (id) => {
   return request(`/Sports/${id}`, {
     method: "DELETE",
   });
 };
 
-
 // FACILITIES
-
 export const getFacilities = () => {
   return request("/Facilities");
 };
 
+
 export const getFacility = (id) => {
   return request(`/Facilities/${id}`);
 };
+
 
 export const createFacility = (facility) => {
   return request("/Facilities", {
@@ -145,6 +182,7 @@ export const createFacility = (facility) => {
   });
 };
 
+
 export const updateFacility = (id, facility) => {
   return request(`/Facilities/${id}`, {
     method: "PUT",
@@ -152,22 +190,23 @@ export const updateFacility = (id, facility) => {
   });
 };
 
+
 export const deleteFacility = (id) => {
   return request(`/Facilities/${id}`, {
     method: "DELETE",
   });
 };
 
-
 // MEMBER SPORTS
-
 export const getMySports = () => {
   return request("/MemberSports");
 };
 
+
 export const getMySport = (sportId) => {
   return request(`/MemberSports/${sportId}`);
 };
+
 
 export const joinSport = (sportId) => {
   return request("/MemberSports", {
@@ -178,6 +217,7 @@ export const joinSport = (sportId) => {
   });
 };
 
+
 export const updateMySport = (sportId, joinedAt) => {
   return request(`/MemberSports/${sportId}`, {
     method: "PUT",
@@ -186,6 +226,7 @@ export const updateMySport = (sportId, joinedAt) => {
     }),
   });
 };
+
 
 export const leaveSport = (sportId) => {
   return request(`/MemberSports/${sportId}`, {
@@ -198,9 +239,11 @@ export const getBookings = () => {
   return request("/Bookings");
 };
 
+
 export const getBooking = (id) => {
   return request(`/Bookings/${id}`);
 };
+
 
 export const createBooking = (booking) => {
   return request("/Bookings", {
@@ -209,6 +252,7 @@ export const createBooking = (booking) => {
   });
 };
 
+
 export const updateBooking = (id, booking) => {
   return request(`/Bookings/${id}`, {
     method: "PUT",
@@ -216,21 +260,23 @@ export const updateBooking = (id, booking) => {
   });
 };
 
+
 export const deleteBooking = (id) => {
   return request(`/Bookings/${id}`, {
     method: "DELETE",
   });
 };
 
-
 // REVIEWS
 export const getReviews = () => {
   return request("/Reviews");
 };
 
+
 export const getReview = (id) => {
   return request(`/Reviews/${id}`);
 };
+
 
 export const createReview = (review) => {
   return request("/Reviews", {
@@ -239,12 +285,14 @@ export const createReview = (review) => {
   });
 };
 
+
 export const updateReview = (id, review) => {
   return request(`/Reviews/${id}`, {
     method: "PUT",
     body: JSON.stringify(review),
   });
 };
+
 
 export const deleteReview = (id) => {
   return request(`/Reviews/${id}`, {
@@ -258,9 +306,11 @@ export const getInquiries = () => {
   return request("/Inquiries");
 };
 
+
 export const getInquiry = (id) => {
   return request(`/Inquiries/${id}`);
 };
+
 
 export const createInquiry = (inquiry) => {
   return request("/Inquiries", {
@@ -269,12 +319,14 @@ export const createInquiry = (inquiry) => {
   });
 };
 
+
 export const updateInquiry = (id, inquiry) => {
   return request(`/Inquiries/${id}`, {
     method: "PUT",
     body: JSON.stringify(inquiry),
   });
 };
+
 
 export const deleteInquiry = (id) => {
   return request(`/Inquiries/${id}`, {
@@ -288,9 +340,11 @@ export const getMembers = () => {
   return request("/Members");
 };
 
+
 export const getMember = (id) => {
   return request(`/Members/${id}`);
 };
+
 
 export const updateMember = (id, member) => {
   return request(`/Members/${id}`, {
@@ -299,8 +353,11 @@ export const updateMember = (id, member) => {
   });
 };
 
+
 export const deleteMember = (id) => {
   return request(`/Members/${id}`, {
     method: "DELETE",
   });
-}; 
+};
+
+export const apiRequest = request;
