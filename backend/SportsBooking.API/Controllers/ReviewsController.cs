@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportsBooking.API.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SportsBooking.API.Controllers
 {
@@ -21,12 +22,13 @@ namespace SportsBooking.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Review>>> GetReviews()
         {
-            return await _context.Reviews.ToListAsync();
+            return await _context.Reviews
+                .ToListAsync();
         }
 
-        // GET: api/Reviews/5
+        // GET: api/Reviews/1
         [HttpGet("{id}")]
-        public async Task<ActionResult<Review>> GetReview(int id)
+        public async Task<ActionResult<Review>> GetReview(decimal id)
         {
             var review = await _context.Reviews
                 .FirstOrDefaultAsync(r => r.ReviewId == id);
@@ -36,14 +38,44 @@ namespace SportsBooking.API.Controllers
                 return NotFound();
             }
 
-            return review;
+            return Ok(review);
         }
 
         // POST: api/Reviews
         [HttpPost]
-        public async Task<ActionResult<Review>> CreateReview(Review review)
+        public async Task<ActionResult<Review>> CreateReview(
+            CreateReviewRequest request)
         {
+            // Get logged-in member ID from JWT
+            var memberId = GetCurrentMemberId();
+
+            if (memberId == null)
+            {
+                return Unauthorized(
+                    "Member identity could not be determined.");
+            }
+
+            // Check facility exists
+            var facilityExists = await _context.Facilities
+                .AnyAsync(f => f.FacilityId == request.FacilityId);
+
+            if (!facilityExists)
+            {
+                return BadRequest("Facility does not exist.");
+            }
+
+            // Create review using logged-in member
+            var review = new Review
+            {
+                MemberId = memberId.Value,
+                FacilityId = request.FacilityId,
+                Rating = request.Rating,
+                CommentText = request.CommentText,
+                CreatedAt = DateTime.Now
+            };
+
             _context.Reviews.Add(review);
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(
@@ -52,55 +84,104 @@ namespace SportsBooking.API.Controllers
                 review);
         }
 
-        // PUT: api/Reviews/5
+        // PUT: api/Reviews/1
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateReview(int id, Review review)
+        public async Task<IActionResult> UpdateReview(
+            decimal id,
+            UpdateReviewRequest request)
         {
-            if (id != review.ReviewId)
+            // Get logged-in member ID from JWT
+            var memberId = GetCurrentMemberId();
+
+            if (memberId == null)
             {
-                return BadRequest();
+                return Unauthorized(
+                    "Member identity could not be determined.");
             }
 
-            _context.Entry(review).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ReviewExists(id))
-                {
-                    return NotFound();
-                }
-
-                throw;
-            }
-
-            return NoContent();
-        }
-
-        // DELETE: api/Reviews/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReview(int id)
-        {
+            // Find review belonging to logged-in member
             var review = await _context.Reviews
-                .FirstOrDefaultAsync(r => r.ReviewId == id);
+                .FirstOrDefaultAsync(r =>
+                    r.ReviewId == id &&
+                    r.MemberId == memberId.Value);
 
             if (review == null)
             {
-                return NotFound();
+                return NotFound(
+                    "Review does not exist or does not belong to you.");
             }
 
-            _context.Reviews.Remove(review);
+            // Only update allowed fields
+            review.Rating = request.Rating;
+            review.CommentText = request.CommentText;
+
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool ReviewExists(int id)
+        // DELETE: api/Reviews/1
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteReview(decimal id)
         {
-            return _context.Reviews.Any(e => e.ReviewId == id);
+            // Get logged-in member ID from JWT
+            var memberId = GetCurrentMemberId();
+
+            if (memberId == null)
+            {
+                return Unauthorized(
+                    "Member identity could not be determined.");
+            }
+
+            // Find review belonging to logged-in member
+            var review = await _context.Reviews
+                .FirstOrDefaultAsync(r =>
+                    r.ReviewId == id &&
+                    r.MemberId == memberId.Value);
+
+            if (review == null)
+            {
+                return NotFound(
+                    "Review does not exist or does not belong to you.");
+            }
+
+            _context.Reviews.Remove(review);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
+
+        // Get logged-in member ID from JWT
+        private decimal? GetCurrentMemberId()
+        {
+            var memberIdClaim = User.FindFirst(
+                ClaimTypes.NameIdentifier)?.Value;
+
+            if (decimal.TryParse(memberIdClaim, out var memberId))
+            {
+                return memberId;
+            }
+
+            return null;
+        }
+    }
+
+    // Request model for creating a review
+    public class CreateReviewRequest
+    {
+        public decimal FacilityId { get; set; }
+
+        public decimal Rating { get; set; }
+
+        public string? CommentText { get; set; }
+    }
+
+    // Request model for updating a review
+    public class UpdateReviewRequest
+    {
+        public decimal Rating { get; set; }
+
+        public string? CommentText { get; set; }
     }
 }

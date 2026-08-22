@@ -18,6 +18,7 @@ namespace SportsBooking.API.Controllers
         }
 
         // GET: api/Facilities
+        // All authenticated users can view facilities
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetFacilities()
         {
@@ -47,6 +48,7 @@ namespace SportsBooking.API.Controllers
         }
 
         // GET: api/Facilities/5
+        // All authenticated users can view a facility
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> GetFacility(decimal id)
         {
@@ -82,8 +84,11 @@ namespace SportsBooking.API.Controllers
         }
 
         // POST: api/Facilities
+        // Admin only
         [HttpPost]
-        public async Task<ActionResult<Facility>> PostFacility(Facility facility)
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<Facility>> PostFacility(
+            Facility facility)
         {
             // Make sure the referenced sport exists
             var sportExists = await _context.Sports
@@ -108,7 +113,9 @@ namespace SportsBooking.API.Controllers
         }
 
         // PUT: api/Facilities/5
+        // Admin only
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutFacility(
             decimal id,
             Facility facility)
@@ -156,7 +163,9 @@ namespace SportsBooking.API.Controllers
         }
 
         // DELETE: api/Facilities/5
+        // Admin only
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteFacility(decimal id)
         {
             var facility = await _context.Facilities

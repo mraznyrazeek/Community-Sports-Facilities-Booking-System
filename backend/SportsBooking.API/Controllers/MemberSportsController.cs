@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportsBooking.API.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SportsBooking.API.Controllers
 {
@@ -21,21 +22,22 @@ namespace SportsBooking.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetMemberSports()
         {
+            var memberId = GetCurrentMemberId();
+
+            if (memberId == null)
+            {
+                return Unauthorized();
+            }
+
             var memberSports = await _context.MemberSports
                 .Include(ms => ms.Member)
                 .Include(ms => ms.Sport)
+                .Where(ms => ms.MemberId == memberId.Value)
                 .Select(ms => new
                 {
                     memberId = ms.MemberId,
                     sportId = ms.SportId,
                     joinedAt = ms.JoinedAt,
-
-                    member = ms.Member == null ? null : new
-                    {
-                        memberId = ms.Member.MemberId,
-                        name = ms.Member.Name,
-                        email = ms.Member.Email
-                    },
 
                     sport = ms.Sport == null ? null : new
                     {
@@ -49,30 +51,27 @@ namespace SportsBooking.API.Controllers
             return Ok(memberSports);
         }
 
-        // GET: api/MemberSports/1/1
-        [HttpGet("{memberId}/{sportId}")]
-        public async Task<ActionResult<object>> GetMemberSport(
-            decimal memberId,
-            decimal sportId)
+        // GET: api/MemberSports/1
+        [HttpGet("{sportId}")]
+        public async Task<ActionResult<object>> GetMemberSport(decimal sportId)
         {
+            var memberId = GetCurrentMemberId();
+
+            if (memberId == null)
+            {
+                return Unauthorized();
+            }
+
             var memberSport = await _context.MemberSports
-                .Include(ms => ms.Member)
                 .Include(ms => ms.Sport)
                 .Where(ms =>
-                    ms.MemberId == memberId &&
+                    ms.MemberId == memberId.Value &&
                     ms.SportId == sportId)
                 .Select(ms => new
                 {
                     memberId = ms.MemberId,
                     sportId = ms.SportId,
                     joinedAt = ms.JoinedAt,
-
-                    member = ms.Member == null ? null : new
-                    {
-                        memberId = ms.Member.MemberId,
-                        name = ms.Member.Name,
-                        email = ms.Member.Email
-                    },
 
                     sport = ms.Sport == null ? null : new
                     {
@@ -96,13 +95,11 @@ namespace SportsBooking.API.Controllers
         public async Task<ActionResult<object>> CreateMemberSport(
             CreateMemberSportRequest request)
         {
-            // Check if member exists
-            var memberExists = await _context.Members
-                .AnyAsync(m => m.MemberId == request.MemberId);
+            var memberId = GetCurrentMemberId();
 
-            if (!memberExists)
+            if (memberId == null)
             {
-                return BadRequest("Member does not exist.");
+                return Unauthorized();
             }
 
             // Check if sport exists
@@ -114,22 +111,21 @@ namespace SportsBooking.API.Controllers
                 return BadRequest("Sport does not exist.");
             }
 
-            // Check if member is already registered for this sport
+            // Check if current member is already registered
             var alreadyExists = await _context.MemberSports
                 .AnyAsync(ms =>
-                    ms.MemberId == request.MemberId &&
+                    ms.MemberId == memberId.Value &&
                     ms.SportId == request.SportId);
 
             if (alreadyExists)
             {
                 return Conflict(
-                    "This member is already registered for this sport.");
+                    "You are already registered for this sport.");
             }
 
-            // Create new MemberSport
             var memberSport = new MemberSport
             {
-                MemberId = request.MemberId,
+                MemberId = memberId.Value,
                 SportId = request.SportId,
                 JoinedAt = DateTime.Now
             };
@@ -142,7 +138,6 @@ namespace SportsBooking.API.Controllers
                 nameof(GetMemberSport),
                 new
                 {
-                    memberId = memberSport.MemberId,
                     sportId = memberSport.SportId
                 },
                 new
@@ -153,16 +148,22 @@ namespace SportsBooking.API.Controllers
                 });
         }
 
-        // PUT: api/MemberSports/1/1
-        [HttpPut("{memberId}/{sportId}")]
+        // PUT: api/MemberSports/1
+        [HttpPut("{sportId}")]
         public async Task<IActionResult> UpdateMemberSport(
-            decimal memberId,
             decimal sportId,
             UpdateMemberSportRequest request)
         {
+            var memberId = GetCurrentMemberId();
+
+            if (memberId == null)
+            {
+                return Unauthorized();
+            }
+
             var memberSport = await _context.MemberSports
                 .FirstOrDefaultAsync(ms =>
-                    ms.MemberId == memberId &&
+                    ms.MemberId == memberId.Value &&
                     ms.SportId == sportId);
 
             if (memberSport == null)
@@ -170,8 +171,6 @@ namespace SportsBooking.API.Controllers
                 return NotFound();
             }
 
-            // We normally don't change MemberId/SportId.
-            // Only JoinedAt can be updated.
             memberSport.JoinedAt = request.JoinedAt;
 
             await _context.SaveChangesAsync();
@@ -179,15 +178,20 @@ namespace SportsBooking.API.Controllers
             return NoContent();
         }
 
-        // DELETE: api/MemberSports/1/1
-        [HttpDelete("{memberId}/{sportId}")]
-        public async Task<IActionResult> DeleteMemberSport(
-            decimal memberId,
-            decimal sportId)
+        // DELETE: api/MemberSports/1
+        [HttpDelete("{sportId}")]
+        public async Task<IActionResult> DeleteMemberSport(decimal sportId)
         {
+            var memberId = GetCurrentMemberId();
+
+            if (memberId == null)
+            {
+                return Unauthorized();
+            }
+
             var memberSport = await _context.MemberSports
                 .FirstOrDefaultAsync(ms =>
-                    ms.MemberId == memberId &&
+                    ms.MemberId == memberId.Value &&
                     ms.SportId == sportId);
 
             if (memberSport == null)
@@ -201,13 +205,24 @@ namespace SportsBooking.API.Controllers
 
             return NoContent();
         }
+
+        // Get logged-in member ID from JWT
+        private decimal? GetCurrentMemberId()
+        {
+            var memberIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (decimal.TryParse(memberIdClaim, out var memberId))
+            {
+                return memberId;
+            }
+
+            return null;
+        }
     }
 
     // Request model for POST
     public class CreateMemberSportRequest
     {
-        public decimal MemberId { get; set; }
-
         public decimal SportId { get; set; }
     }
 

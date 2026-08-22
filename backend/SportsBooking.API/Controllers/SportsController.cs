@@ -18,6 +18,7 @@ namespace SportsBooking.API.Controllers
         }
 
         // GET: api/Sports
+        // All authenticated users can view sports
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Sport>>> GetSports()
         {
@@ -25,8 +26,9 @@ namespace SportsBooking.API.Controllers
         }
 
         // GET: api/Sports/5
+        // All authenticated users can view a sport
         [HttpGet("{id}")]
-        public async Task<ActionResult<Sport>> GetSport(int id)
+        public async Task<ActionResult<Sport>> GetSport(decimal id)
         {
             var sport = await _context.Sports
                 .FirstOrDefaultAsync(s => s.SportId == id);
@@ -39,7 +41,10 @@ namespace SportsBooking.API.Controllers
             return sport;
         }
 
+        // POST: api/Sports
+        // Admin only
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Sport>> PostSport(Sport sport)
         {
             var maxId = await _context.Sports
@@ -58,7 +63,9 @@ namespace SportsBooking.API.Controllers
         }
 
         // PUT: api/Sports/1
+        // Admin only
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateSport(
             decimal id,
             Sport sport)
@@ -84,7 +91,8 @@ namespace SportsBooking.API.Controllers
 
             if (duplicateName)
             {
-                return BadRequest("A sport with this name already exists.");
+                return BadRequest(
+                    "A sport with this name already exists.");
             }
 
             existingSport.SportName = sport.SportName;
@@ -95,9 +103,10 @@ namespace SportsBooking.API.Controllers
             return NoContent();
         }
 
-
         // DELETE: api/Sports/1
+        // Admin only
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteSport(decimal id)
         {
             var sport = await _context.Sports

@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportsBooking.API.Models;
-using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace SportsBooking.API.Controllers
 {
@@ -91,7 +92,7 @@ namespace SportsBooking.API.Controllers
 
             if (booking == null)
             {
-                return NotFound();
+                return NotFound("Booking does not exist.");
             }
 
             return Ok(booking);
@@ -102,9 +103,25 @@ namespace SportsBooking.API.Controllers
         public async Task<ActionResult<object>> CreateBooking(
             BookingCreateRequest request)
         {
+            // Get logged-in member ID from JWT
+            var memberIdClaim = User.FindFirst(
+                ClaimTypes.NameIdentifier);
+
+            if (memberIdClaim == null)
+            {
+                return Unauthorized("Member identity could not be determined.");
+            }
+
+            if (!decimal.TryParse(
+                    memberIdClaim.Value,
+                    out decimal memberId))
+            {
+                return Unauthorized("Invalid member identity.");
+            }
+
             // Check member exists
             var memberExists = await _context.Members
-                .AnyAsync(m => m.MemberId == request.MemberId);
+                .AnyAsync(m => m.MemberId == memberId);
 
             if (!memberExists)
             {
@@ -121,21 +138,28 @@ namespace SportsBooking.API.Controllers
             }
 
             // Validate start time
-            if (!TimeSpan.TryParse(request.StartTime, out var requestedStart))
+            if (!TimeSpan.TryParse(
+                    request.StartTime,
+                    out var requestedStart))
             {
-                return BadRequest("Invalid start time. Use HH:mm format.");
+                return BadRequest(
+                    "Invalid start time. Use HH:mm format.");
             }
 
             // Validate end time
-            if (!TimeSpan.TryParse(request.EndTime, out var requestedEnd))
+            if (!TimeSpan.TryParse(
+                    request.EndTime,
+                    out var requestedEnd))
             {
-                return BadRequest("Invalid end time. Use HH:mm format.");
+                return BadRequest(
+                    "Invalid end time. Use HH:mm format.");
             }
 
             // End must be after start
             if (requestedEnd <= requestedStart)
             {
-                return BadRequest("End time must be after start time.");
+                return BadRequest(
+                    "End time must be after start time.");
             }
 
             // Get existing bookings for same facility/date
@@ -149,12 +173,16 @@ namespace SportsBooking.API.Controllers
             // Check time overlap
             foreach (var existing in existingBookings)
             {
-                if (!TimeSpan.TryParse(existing.StartTime, out var existingStart))
+                if (!TimeSpan.TryParse(
+                        existing.StartTime,
+                        out var existingStart))
                 {
                     continue;
                 }
 
-                if (!TimeSpan.TryParse(existing.EndTime, out var existingEnd))
+                if (!TimeSpan.TryParse(
+                        existing.EndTime,
+                        out var existingEnd))
                 {
                     continue;
                 }
@@ -166,22 +194,26 @@ namespace SportsBooking.API.Controllers
                 if (overlaps)
                 {
                     return BadRequest(
-                        "The facility is already booked during the selected time."
-                    );
+                        "The facility is already booked during the selected time.");
                 }
             }
 
-            // Create booking entity
+            // Create booking
             var booking = new Booking
             {
-                MemberId = request.MemberId,
+                // IMPORTANT:
+                // MemberId comes from JWT, NOT from the request
+                MemberId = memberId,
+
                 FacilityId = request.FacilityId,
                 BookingDate = request.BookingDate,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
+
                 Status = string.IsNullOrWhiteSpace(request.Status)
                     ? "Confirmed"
                     : request.Status,
+
                 CreatedAt = DateTime.Now
             };
 
@@ -202,60 +234,81 @@ namespace SportsBooking.API.Controllers
                     endTime = booking.EndTime,
                     status = booking.Status,
                     createdAt = booking.CreatedAt
-                }
-            );
+                });
         }
 
         // PUT: api/Bookings/1
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBooking(
             decimal id,
-            Booking booking)
+            BookingUpdateRequest request)
         {
-            if (id != booking.BookingId)
+            // Get logged-in member ID from JWT
+            var memberIdClaim = User.FindFirst(
+                ClaimTypes.NameIdentifier);
+
+            if (memberIdClaim == null)
             {
-                return BadRequest("Booking ID does not match.");
+                return Unauthorized();
             }
 
-            // Check member
-            var memberExists = await _context.Members
-                .AnyAsync(m => m.MemberId == booking.MemberId);
-
-            if (!memberExists)
+            if (!decimal.TryParse(
+                    memberIdClaim.Value,
+                    out decimal memberId))
             {
-                return BadRequest("Member does not exist.");
+                return Unauthorized();
             }
 
-            // Check facility
+            // Find booking owned by logged-in member
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b =>
+                    b.BookingId == id &&
+                    b.MemberId == memberId);
+
+            if (booking == null)
+            {
+                return NotFound(
+                    "Booking does not exist or does not belong to you.");
+            }
+
+            // Check facility exists
             var facilityExists = await _context.Facilities
-                .AnyAsync(f => f.FacilityId == booking.FacilityId);
+                .AnyAsync(f => f.FacilityId == request.FacilityId);
 
             if (!facilityExists)
             {
                 return BadRequest("Facility does not exist.");
             }
 
-            // Validate times
-            if (!TimeSpan.TryParse(booking.StartTime, out var requestedStart))
+            // Validate start time
+            if (!TimeSpan.TryParse(
+                    request.StartTime,
+                    out var requestedStart))
             {
-                return BadRequest("Invalid start time. Use HH:mm format.");
+                return BadRequest(
+                    "Invalid start time. Use HH:mm format.");
             }
 
-            if (!TimeSpan.TryParse(booking.EndTime, out var requestedEnd))
+            // Validate end time
+            if (!TimeSpan.TryParse(
+                    request.EndTime,
+                    out var requestedEnd))
             {
-                return BadRequest("Invalid end time. Use HH:mm format.");
+                return BadRequest(
+                    "Invalid end time. Use HH:mm format.");
             }
 
             if (requestedEnd <= requestedStart)
             {
-                return BadRequest("End time must be after start time.");
+                return BadRequest(
+                    "End time must be after start time.");
             }
 
-            // Find other bookings for the same facility/date
+            // Find other bookings for same facility/date
             var existingBookings = await _context.Bookings
                 .Where(b =>
-                    b.FacilityId == booking.FacilityId &&
-                    b.BookingDate == booking.BookingDate &&
+                    b.FacilityId == request.FacilityId &&
+                    b.BookingDate == request.BookingDate &&
                     b.BookingId != id &&
                     b.Status != "Cancelled")
                 .ToListAsync();
@@ -263,12 +316,16 @@ namespace SportsBooking.API.Controllers
             // Check overlap
             foreach (var existing in existingBookings)
             {
-                if (!TimeSpan.TryParse(existing.StartTime, out var existingStart))
+                if (!TimeSpan.TryParse(
+                        existing.StartTime,
+                        out var existingStart))
                 {
                     continue;
                 }
 
-                if (!TimeSpan.TryParse(existing.EndTime, out var existingEnd))
+                if (!TimeSpan.TryParse(
+                        existing.EndTime,
+                        out var existingEnd))
                 {
                     continue;
                 }
@@ -280,33 +337,22 @@ namespace SportsBooking.API.Controllers
                 if (overlaps)
                 {
                     return BadRequest(
-                        "The facility is already booked during the selected time."
-                    );
+                        "The facility is already booked during the selected time.");
                 }
             }
 
-            booking.CreatedAt = booking.CreatedAt == default
-                ? DateTime.Now
-                : booking.CreatedAt;
+            // Update only allowed fields
+            booking.FacilityId = request.FacilityId;
+            booking.BookingDate = request.BookingDate;
+            booking.StartTime = request.StartTime;
+            booking.EndTime = request.EndTime;
 
-            _context.Entry(booking).State = EntityState.Modified;
-
-            try
+            if (!string.IsNullOrWhiteSpace(request.Status))
             {
-                await _context.SaveChangesAsync();
+                booking.Status = request.Status;
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                var exists = await _context.Bookings
-                    .AnyAsync(b => b.BookingId == id);
 
-                if (!exists)
-                {
-                    return NotFound();
-                }
-
-                throw;
-            }
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
@@ -315,12 +361,32 @@ namespace SportsBooking.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBooking(decimal id)
         {
+            // Get logged-in member ID from JWT
+            var memberIdClaim = User.FindFirst(
+                ClaimTypes.NameIdentifier);
+
+            if (memberIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            if (!decimal.TryParse(
+                    memberIdClaim.Value,
+                    out decimal memberId))
+            {
+                return Unauthorized();
+            }
+
+            // Only find booking if it belongs to logged-in member
             var booking = await _context.Bookings
-                .FirstOrDefaultAsync(b => b.BookingId == id);
+                .FirstOrDefaultAsync(b =>
+                    b.BookingId == id &&
+                    b.MemberId == memberId);
 
             if (booking == null)
             {
-                return NotFound();
+                return NotFound(
+                    "Booking does not exist or does not belong to you.");
             }
 
             _context.Bookings.Remove(booking);
@@ -330,22 +396,21 @@ namespace SportsBooking.API.Controllers
             return NoContent();
         }
 
-        // GET: api/Bookings/availability?facilityId=1&date=2026-08-23
+        // GET: api/Bookings/availability
         [HttpGet("availability")]
         public async Task<ActionResult<object>> GetAvailability(
             decimal facilityId,
             DateTime date)
         {
-            // Check facility exists
             var facility = await _context.Facilities
-                .FirstOrDefaultAsync(f => f.FacilityId == facilityId);
+                .FirstOrDefaultAsync(f =>
+                    f.FacilityId == facilityId);
 
             if (facility == null)
             {
                 return NotFound("Facility does not exist.");
             }
 
-            // Get bookings for this facility and date
             var bookings = await _context.Bookings
                 .Where(b =>
                     b.FacilityId == facilityId &&
@@ -368,23 +433,27 @@ namespace SportsBooking.API.Controllers
             });
         }
 
-        // GET: api/Bookings/member/1
-        [HttpGet("member/{memberId}")]
-        public async Task<ActionResult<IEnumerable<object>>> GetMemberBookings(
-            decimal memberId)
+        // GET: api/Bookings/member/my
+        [HttpGet("member/my")]
+        public async Task<ActionResult<IEnumerable<object>>> GetMyBookings()
         {
-            // Check member exists
-            var memberExists = await _context.Members
-                .AnyAsync(m => m.MemberId == memberId);
+            var memberIdClaim = User.FindFirst(
+                ClaimTypes.NameIdentifier);
 
-            if (!memberExists)
+            if (memberIdClaim == null)
             {
-                return NotFound("Member does not exist.");
+                return Unauthorized();
+            }
+
+            if (!decimal.TryParse(
+                    memberIdClaim.Value,
+                    out decimal memberId))
+            {
+                return Unauthorized();
             }
 
             var bookings = await _context.Bookings
                 .Include(b => b.Facility)
-                .Include(b => b.Member)
                 .Where(b => b.MemberId == memberId)
                 .OrderByDescending(b => b.BookingDate)
                 .ThenByDescending(b => b.StartTime)
@@ -417,7 +486,6 @@ namespace SportsBooking.API.Controllers
         public async Task<ActionResult<IEnumerable<object>>> GetFacilityBookings(
             decimal facilityId)
         {
-            // Check facility exists
             var facilityExists = await _context.Facilities
                 .AnyAsync(f => f.FacilityId == facilityId);
 
@@ -467,18 +535,40 @@ namespace SportsBooking.API.Controllers
         [HttpPut("{id}/cancel")]
         public async Task<IActionResult> CancelBooking(decimal id)
         {
+            // Get logged-in member ID from JWT
+            var memberIdClaim = User.FindFirst(
+                ClaimTypes.NameIdentifier);
+
+            if (memberIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            if (!decimal.TryParse(
+                    memberIdClaim.Value,
+                    out decimal memberId))
+            {
+                return Unauthorized();
+            }
+
+            // Only find booking if it belongs to logged-in member
             var booking = await _context.Bookings
-                .FirstOrDefaultAsync(b => b.BookingId == id);
+                .FirstOrDefaultAsync(b =>
+                    b.BookingId == id &&
+                    b.MemberId == memberId);
 
             if (booking == null)
             {
-                return NotFound("Booking does not exist.");
+                return NotFound(
+                    "Booking does not exist or does not belong to you.");
             }
 
-            // Already cancelled
-            if (booking.Status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+            if (booking.Status.Equals(
+                    "Cancelled",
+                    StringComparison.OrdinalIgnoreCase))
             {
-                return BadRequest("This booking is already cancelled.");
+                return BadRequest(
+                    "This booking is already cancelled.");
             }
 
             booking.Status = "Cancelled";
@@ -492,6 +582,5 @@ namespace SportsBooking.API.Controllers
                 status = booking.Status
             });
         }
-
     }
 }

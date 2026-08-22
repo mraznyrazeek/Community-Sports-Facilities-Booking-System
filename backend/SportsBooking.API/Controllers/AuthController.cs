@@ -2,6 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using SportsBooking.API.Models;
 using SportsBooking.API.Models.Auth;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace SportsBooking.API.Controllers
 {
@@ -10,10 +14,14 @@ namespace SportsBooking.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly SportsBookingDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(SportsBookingDbContext context)
+        public AuthController(
+            SportsBookingDbContext context,
+            IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // POST: api/Auth/register
@@ -28,7 +36,8 @@ namespace SportsBooking.API.Controllers
 
             if (existingMember != null)
             {
-                return BadRequest("An account with this email already exists.");
+                return BadRequest(
+                    "An account with this email already exists.");
             }
 
             // Generate next Member ID
@@ -71,85 +80,111 @@ namespace SportsBooking.API.Controllers
 
         // POST: api/Auth/login
         [HttpPost("login")]
-        public async Task<ActionResult<object>> Login(LoginRequest request)
+        public async Task<ActionResult<object>> Login(
+            LoginRequest request)
         {
+            // Find member by email
             var member = await _context.Members
                 .FirstOrDefaultAsync(m =>
                     m.Email.ToLower() == request.Email.ToLower());
 
             if (member == null)
             {
-                return Unauthorized("Invalid email or password.");
+                return Unauthorized(
+                    "Invalid email or password.");
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, member.Password))
+            // Verify password
+            if (!BCrypt.Net.BCrypt.Verify(
+                    request.Password,
+                    member.Password))
             {
-                return Unauthorized("Invalid email or password.");
+                return Unauthorized(
+                    "Invalid email or password.");
             }
 
-            if (!member.Status.Equals("Active", StringComparison.OrdinalIgnoreCase))
+            // Check account status
+            if (!member.Status.Equals(
+                    "Active",
+                    StringComparison.OrdinalIgnoreCase))
             {
-                return Unauthorized("Your account is not active.");
+                return Unauthorized(
+                    "Your account is not active.");
             }
 
-            var claims = new[]
+            // JWT CLAIMS
+
+            var claimsList = new List<Claim>
             {
-        new System.Security.Claims.Claim(
-            System.Security.Claims.ClaimTypes.NameIdentifier,
-            member.MemberId.ToString()),
+                new Claim(
+                    ClaimTypes.NameIdentifier,
+                    member.MemberId.ToString()),
 
-        new System.Security.Claims.Claim(
-            System.Security.Claims.ClaimTypes.Name,
-            member.Name),
+                new Claim(
+                    ClaimTypes.Name,
+                    member.Name),
 
-        new System.Security.Claims.Claim(
-            System.Security.Claims.ClaimTypes.Email,
-            member.Email)
-    };
+                new Claim(
+                    ClaimTypes.Email,
+                    member.Email)
+            };
 
-            var key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                System.Text.Encoding.UTF8.GetBytes(
-                    HttpContext.RequestServices
-                        .GetRequiredService<
-                            Microsoft.Extensions.Configuration.IConfiguration>()
-                        ["Jwt:Key"]!));
+            // ADMIN ROLE
 
-            var credentials =
-                new Microsoft.IdentityModel.Tokens.SigningCredentials(
-                    key,
-                    Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256);
+            var adminEmail = _configuration["Jwt:AdminEmail"];
 
-            var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
-                issuer: HttpContext.RequestServices
-                    .GetRequiredService<
-                        Microsoft.Extensions.Configuration.IConfiguration>()
-                    ["Jwt:Issuer"],
+            if (!string.IsNullOrWhiteSpace(adminEmail) &&
+                member.Email.Equals(
+                    adminEmail,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                claimsList.Add(
+                    new Claim(
+                        ClaimTypes.Role,
+                        "Admin"));
+            }
 
-                audience: HttpContext.RequestServices
-                    .GetRequiredService<
-                        Microsoft.Extensions.Configuration.IConfiguration>()
-                    ["Jwt:Audience"],
+            var claims = claimsList.ToArray();
+
+            // JWT KEY
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    _configuration["Jwt:Key"]!));
+
+            var credentials = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256);
+
+
+            // CREATE TOKEN
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+
+                audience: _configuration["Jwt:Audience"],
 
                 claims: claims,
 
                 expires: DateTime.UtcNow.AddMinutes(
                     double.Parse(
-                        HttpContext.RequestServices
-                            .GetRequiredService<
-                                Microsoft.Extensions.Configuration.IConfiguration>()
-                            ["Jwt:ExpiryMinutes"]!)),
+                        _configuration["Jwt:ExpiryMinutes"]!)),
 
                 signingCredentials: credentials
             );
 
             var tokenString =
-                new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler()
+                new JwtSecurityTokenHandler()
                     .WriteToken(token);
+
+            // LOGIN RESPONSE
 
             return Ok(new
             {
                 message = "Login successful.",
+
                 token = tokenString,
+
                 member = new
                 {
                     memberId = member.MemberId,
