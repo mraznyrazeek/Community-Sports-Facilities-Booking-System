@@ -1,0 +1,92 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev20c class="oracle.dbtools.crest.model.design.storage.oracle.v20c.TableProxyOraclev20c" name="BOOKING" directorySegmentName="seg_0" id="DED5FF0A-D518-8D3B-8EC5-BE79C09C5B90">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:18 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<schemaObject>A48F502E-71D2-C509-378F-E176AC234953</schemaObject>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<segment>C2897223-9510-723C-810C-713EFC60CC56</segment>
+<tableSpace>C5119188-667E-0AEC-7C46-2FB47A6E7866</tableSpace>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<inMemory>NO</inMemory>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="START_TIME" id="16FA6011-893E-23A6-84DC-1F2C12E00100">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="BOOKING_ID" id="3456147D-85FD-75B7-1077-97D1AAF6D9C9">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="BOOKING_DATE" id="60CDB0CE-C20A-91D4-4801-8B92B6FA2008">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="FACILITY_ID" id="A0759FB2-5D71-120E-0315-733B31660C7B">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="CREATED_AT" id="C7A2700C-979A-96C6-55FF-C9F641148F5C">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="STATUS" id="D2267CEC-76DD-BC6F-E3EE-B16DB904B73A">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="MEMBER_ID" id="D5363692-7F86-BCD8-9CBF-D5B461B10A34">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="END_TIME" id="F569F3DC-FB02-B56C-4F95-81F87B6E35CD">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ColumnProxy>
+</columnProxies>
+<indexProxies>
+<IndexProxy class="oracle.dbtools.crest.model.design.storage.oracle.v10g.IndexProxyOraclev10g" name="PK_BOOKING" id="FC6608E2-6C4C-EFB1-021D-6E672C1E11D7">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:21 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<schemaObject>A48F502E-71D2-C509-378F-E176AC234953</schemaObject>
+<segment>8AB7370F-752D-0C82-5DBB-6A4547CB96E5</segment>
+<tableSpace>C5119188-667E-0AEC-7C46-2FB47A6E7866</tableSpace>
+</IndexProxy>
+</indexProxies>
+<foreignKeys>
+<ForeignKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.FKProxyOraclev10g" name="BOOKING_MEMBER_FK" id="2713F607-033C-6298-36BF-8335B744924F">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:26 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ForeignKey>
+<ForeignKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.FKProxyOraclev10g" name="BOOKING_FACILITY_FK" id="A752D64F-CA6E-37DB-470E-83E8ED8B9EE5">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:26 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ForeignKey>
+</foreignKeys>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="PK_BOOKING" id="39B5BEB4-9316-8DF3-481F-55BAC92B5B3D">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:25 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<segment>8AB7370F-752D-0C82-5DBB-6A4547CB96E5</segment>
+<tableSpace>C5119188-667E-0AEC-7C46-2FB47A6E7866</tableSpace>
+<existingIndex>FC6608E2-6C4C-EFB1-021D-6E672C1E11D7</existingIndex>
+<indexSegment>8AB7370F-752D-0C82-5DBB-6A4547CB96E5</indexSegment>
+<indexSort>SORTED</indexSort>
+<usingIndex>BY INDEX NAME</usingIndex>
+</PrimaryKey>
+</primaryKeys>
+</TableProxyOraclev20c>

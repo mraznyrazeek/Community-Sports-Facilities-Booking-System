@@ -1,0 +1,8 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<SegmentOraclev10g class="oracle.dbtools.crest.model.design.storage.oracle.v10g.SegmentOraclev10g" name="Storage13" directorySegmentName="seg_0" id="2304FEF7-8D5D-5CF3-3BB0-9B4AF5D38A73">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:24 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<initrans>2</initrans>
+<maxTrans>255</maxTrans>
+</SegmentOraclev10g>

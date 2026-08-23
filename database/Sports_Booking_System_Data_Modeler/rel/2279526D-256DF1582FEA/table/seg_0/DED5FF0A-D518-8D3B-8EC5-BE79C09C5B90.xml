@@ -1,0 +1,178 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="DED5FF0A-D518-8D3B-8EC5-BE79C09C5B90" schemaObject="A48F502E-71D2-C509-378F-E176AC234953" name="BOOKING">
+<sourceConnName>Sports Booking</sourceConnName>
+<sourceObjSchema>SPORTS_BOOKING</sourceObjSchema>
+<sourceObjName>BOOKING</sourceObjName>
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:18 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="BOOKING_ID" id="3456147D-85FD-75B7-1077-97D1AAF6D9C9">
+<sourceConnName>Sports Booking</sourceConnName>
+<sourceObjSchema>BOOKING</sourceObjSchema>
+<sourceObjName>BOOKING_ID</sourceObjName>
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="MEMBER_ID" id="D5363692-7F86-BCD8-9CBF-D5B461B10A34">
+<sourceConnName>Sports Booking</sourceConnName>
+<sourceObjSchema>BOOKING</sourceObjSchema>
+<sourceObjName>MEMBER_ID</sourceObjName>
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="FFCD2302-26F2-E27C-3596-7CE1E3C1D1C1" referredColumn="4B624236-E4DD-0D7B-5395-67DFD04532F6"/>
+</associations>
+</Column>
+<Column name="FACILITY_ID" id="A0759FB2-5D71-120E-0315-733B31660C7B">
+<sourceConnName>Sports Booking</sourceConnName>
+<sourceObjSchema>BOOKING</sourceObjSchema>
+<sourceObjName>FACILITY_ID</sourceObjName>
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="C8C11853-3145-A8A7-71FC-564FFBC5A3F4" referredColumn="6053A66A-B614-0FCC-5C5F-C00F078F6D2C"/>
+</associations>
+</Column>
+<Column name="BOOKING_DATE" id="60CDB0CE-C20A-91D4-4801-8B92B6FA2008">
+<sourceConnName>Sports Booking</sourceConnName>
+<sourceObjSchema>BOOKING</sourceObjSchema>
+<sourceObjName>BOOKING_DATE</sourceObjName>
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT007</logicalDatatype>
+<dataTypeSize>7</dataTypeSize>
+<ownDataTypeParameters>7,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="START_TIME" id="16FA6011-893E-23A6-84DC-1F2C12E00100">
+<sourceConnName>Sports Booking</sourceConnName>
+<sourceObjSchema>BOOKING</sourceObjSchema>
+<sourceObjName>START_TIME</sourceObjName>
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>10 BYTE</dataTypeSize>
+<ownDataTypeParameters>10 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="END_TIME" id="F569F3DC-FB02-B56C-4F95-81F87B6E35CD">
+<sourceConnName>Sports Booking</sourceConnName>
+<sourceObjSchema>BOOKING</sourceObjSchema>
+<sourceObjName>END_TIME</sourceObjName>
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>10 BYTE</dataTypeSize>
+<ownDataTypeParameters>10 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="STATUS" id="D2267CEC-76DD-BC6F-E3EE-B16DB904B73A">
+<sourceConnName>Sports Booking</sourceConnName>
+<sourceObjSchema>BOOKING</sourceObjSchema>
+<sourceObjName>STATUS</sourceObjName>
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>20 BYTE</dataTypeSize>
+<ownDataTypeParameters>20 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="CREATED_AT" id="C7A2700C-979A-96C6-55FF-C9F641148F5C">
+<sourceConnName>Sports Booking</sourceConnName>
+<sourceObjSchema>BOOKING</sourceObjSchema>
+<sourceObjName>CREATED_AT</sourceObjName>
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT015</logicalDatatype>
+<dataTypePrecision>6</dataTypePrecision>
+<ownDataTypeParameters>,6,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="39B5BEB4-9316-8DF3-481F-55BAC92B5B3D" name="PK_BOOKING">
+<sourceConnName>Sports Booking</sourceConnName>
+<sourceObjSchema>SPORTS_BOOKING</sourceObjSchema>
+<sourceObjName>PK_BOOKING</sourceObjName>
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:25 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="3456147D-85FD-75B7-1077-97D1AAF6D9C9"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="FC6608E2-6C4C-EFB1-021D-6E672C1E11D7" schemaObject="A48F502E-71D2-C509-378F-E176AC234953" name="PK_BOOKING">
+<sourceConnName>Sports Booking</sourceConnName>
+<sourceObjSchema>SPORTS_BOOKING</sourceObjSchema>
+<sourceObjName>PK_BOOKING</sourceObjName>
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:21 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<indexState>Unique Plain Index</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="3456147D-85FD-75B7-1077-97D1AAF6D9C9"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="A752D64F-CA6E-37DB-470E-83E8ED8B9EE5" name="BOOKING_FACILITY_FK">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:26 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="A0759FB2-5D71-120E-0315-733B31660C7B"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="2713F607-033C-6298-36BF-8335B744924F" name="BOOKING_MEMBER_FK">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:26 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="D5363692-7F86-BCD8-9CBF-D5B461B10A34"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

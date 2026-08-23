@@ -7,7 +7,7 @@ namespace SportsBooking.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class MembersController : ControllerBase
     {
         private readonly SportsBookingDbContext _context;
@@ -17,7 +17,6 @@ namespace SportsBooking.API.Controllers
             _context = context;
         }
 
-        // GET: api/Members
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetMembers()
         {
@@ -29,6 +28,7 @@ namespace SportsBooking.API.Controllers
                     email = m.Email,
                     phone = m.Phone,
                     status = m.Status,
+                    role = m.UserRole,
                     createdAt = m.CreatedAt
                 })
                 .ToListAsync();
@@ -36,8 +36,6 @@ namespace SportsBooking.API.Controllers
             return Ok(members);
         }
 
-
-        // GET: api/Members/1
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> GetMember(decimal id)
         {
@@ -50,6 +48,7 @@ namespace SportsBooking.API.Controllers
                     email = m.Email,
                     phone = m.Phone,
                     status = m.Status,
+                    role = m.UserRole,
                     createdAt = m.CreatedAt
                 })
                 .FirstOrDefaultAsync();
@@ -65,13 +64,14 @@ namespace SportsBooking.API.Controllers
             return Ok(member);
         }
 
-        // POST: api/Members
         [HttpPost]
         public async Task<ActionResult<object>> CreateMember(Member member)
         {
-            // Check whether email already exists
+            var email = member.Email.Trim();
+
             var emailExists = await _context.Members
-                .AnyAsync(m => m.Email == member.Email);
+                .AnyAsync(m =>
+                    m.Email.ToLower() == email.ToLower());
 
             if (emailExists)
             {
@@ -81,26 +81,36 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
-            // Generate next Member ID
             var maxId = await _context.Members
                 .Select(m => (decimal?)m.MemberId)
                 .MaxAsync() ?? 0;
 
             member.MemberId = maxId + 1;
-
-            // Set default values
             member.CreatedAt = DateTime.Now;
+
+            member.Name = member.Name.Trim();
+            member.Email = email;
 
             if (string.IsNullOrWhiteSpace(member.Status))
             {
                 member.Status = "Active";
             }
 
+            if (string.IsNullOrWhiteSpace(member.UserRole))
+            {
+                member.UserRole = "Member";
+            }
+
+            if (!string.IsNullOrWhiteSpace(member.Password))
+            {
+                member.Password = BCrypt.Net.BCrypt.HashPassword(
+                    member.Password);
+            }
+
             _context.Members.Add(member);
 
             await _context.SaveChangesAsync();
 
-            // Return member without password
             var response = new
             {
                 memberId = member.MemberId,
@@ -108,6 +118,7 @@ namespace SportsBooking.API.Controllers
                 email = member.Email,
                 phone = member.Phone,
                 status = member.Status,
+                role = member.UserRole,
                 createdAt = member.CreatedAt
             };
 
@@ -118,15 +129,17 @@ namespace SportsBooking.API.Controllers
             );
         }
 
-        // PUT: api/Members/1
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateMember(decimal id, Member member)
+        public async Task<IActionResult> UpdateMember(
+            decimal id,
+            Member member)
         {
             if (id != member.MemberId)
             {
                 return BadRequest(new
                 {
-                    message = "Member ID in the URL does not match the Member ID in the request body."
+                    message =
+                        "Member ID in the URL does not match the Member ID in the request body."
                 });
             }
 
@@ -141,30 +154,38 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
-            // Check if another member already uses this email
+            var email = member.Email.Trim();
+
             var emailExists = await _context.Members
                 .AnyAsync(m =>
-                    m.Email == member.Email &&
+                    m.Email.ToLower() == email.ToLower() &&
                     m.MemberId != id);
 
             if (emailExists)
             {
                 return Conflict(new
                 {
-                    message = "Another member already uses this email."
+                    message =
+                        "Another member already uses this email."
                 });
             }
 
-            // Update fields
-            existingMember.Name = member.Name;
-            existingMember.Email = member.Email;
+            existingMember.Name = member.Name.Trim();
+            existingMember.Email = email;
             existingMember.Phone = member.Phone;
             existingMember.Status = member.Status;
 
-            // Only update password if a new password was supplied
+            if (!string.IsNullOrWhiteSpace(member.UserRole))
+            {
+                existingMember.UserRole =
+                    member.UserRole.Trim();
+            }
+
             if (!string.IsNullOrWhiteSpace(member.Password))
             {
-                existingMember.Password = member.Password;
+                existingMember.Password =
+                    BCrypt.Net.BCrypt.HashPassword(
+                        member.Password);
             }
 
             await _context.SaveChangesAsync();
@@ -172,7 +193,6 @@ namespace SportsBooking.API.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Members/1
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMember(decimal id)
         {
@@ -197,7 +217,8 @@ namespace SportsBooking.API.Controllers
             {
                 return Conflict(new
                 {
-                    message = "This member cannot be deleted because they are referenced by other records such as bookings, reviews, inquiries, or sports."
+                    message =
+                        "This member cannot be deleted because they are referenced by other records such as bookings, reviews, inquiries, or sports."
                 });
             }
 

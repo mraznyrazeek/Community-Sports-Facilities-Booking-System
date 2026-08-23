@@ -24,41 +24,66 @@ namespace SportsBooking.API.Controllers
             _configuration = configuration;
         }
 
-        // POST: api/Auth/register
         [HttpPost("register")]
         public async Task<ActionResult<object>> Register(
             RegisterRequest request)
         {
-            // Check if email already exists
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                return BadRequest(new
+                {
+                    message = "Name is required."
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                return BadRequest(new
+                {
+                    message = "Email is required."
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Password))
+            {
+                return BadRequest(new
+                {
+                    message = "Password is required."
+                });
+            }
+
+            var email = request.Email.Trim();
+
             var existingMember = await _context.Members
                 .FirstOrDefaultAsync(m =>
-                    m.Email.ToLower() == request.Email.ToLower());
+                    m.Email.ToLower() == email.ToLower());
 
             if (existingMember != null)
             {
-                return BadRequest(
-                    "An account with this email already exists.");
+                return Conflict(new
+                {
+                    message = "An account with this email already exists."
+                });
             }
 
-            // Generate next Member ID
             var lastMemberId = await _context.Members
                 .Select(m => (decimal?)m.MemberId)
                 .MaxAsync() ?? 0;
 
             var nextMemberId = lastMemberId + 1;
 
-            // Hash password
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(
                 request.Password);
 
             var member = new Member
             {
                 MemberId = nextMemberId,
-                Name = request.Name,
-                Email = request.Email,
+                Name = request.Name.Trim(),
+                Email = email,
                 Phone = request.Phone,
                 Password = passwordHash,
                 Status = "Active",
+                UserRole = "Member",
                 CreatedAt = DateTime.Now
             };
 
@@ -74,45 +99,61 @@ namespace SportsBooking.API.Controllers
                 email = member.Email,
                 phone = member.Phone,
                 status = member.Status,
+                role = member.UserRole,
                 createdAt = member.CreatedAt
             });
         }
 
-        // POST: api/Auth/login
         [HttpPost("login")]
         public async Task<ActionResult<object>> Login(
             LoginRequest request)
         {
-            // Find member by email
+            if (string.IsNullOrWhiteSpace(request.Email) ||
+                string.IsNullOrWhiteSpace(request.Password))
+            {
+                return BadRequest(new
+                {
+                    message = "Email and password are required."
+                });
+            }
+
+            var email = request.Email.Trim();
+
             var member = await _context.Members
                 .FirstOrDefaultAsync(m =>
-                    m.Email.ToLower() == request.Email.ToLower());
+                    m.Email.ToLower() == email.ToLower());
 
             if (member == null)
             {
-                return Unauthorized(
-                    "Invalid email or password.");
+                return Unauthorized(new
+                {
+                    message = "Invalid email or password."
+                });
             }
 
-            // Verify password
             if (!BCrypt.Net.BCrypt.Verify(
                     request.Password,
                     member.Password))
             {
-                return Unauthorized(
-                    "Invalid email or password.");
+                return Unauthorized(new
+                {
+                    message = "Invalid email or password."
+                });
             }
 
-            // Check account status
             if (!member.Status.Equals(
                     "Active",
                     StringComparison.OrdinalIgnoreCase))
             {
-                return Unauthorized(
-                    "Your account is not active.");
+                return Unauthorized(new
+                {
+                    message = "Your account is not active."
+                });
             }
 
-            // JWT CLAIMS
+            var userRole = string.IsNullOrWhiteSpace(member.UserRole)
+                ? "Member"
+                : member.UserRole.Trim();
 
             var claimsList = new List<Claim>
             {
@@ -126,27 +167,12 @@ namespace SportsBooking.API.Controllers
 
                 new Claim(
                     ClaimTypes.Email,
-                    member.Email)
+                    member.Email),
+
+                new Claim(
+                    ClaimTypes.Role,
+                    userRole)
             };
-
-            // ADMIN ROLE
-
-            var adminEmail = _configuration["Jwt:AdminEmail"];
-
-            if (!string.IsNullOrWhiteSpace(adminEmail) &&
-                member.Email.Equals(
-                    adminEmail,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                claimsList.Add(
-                    new Claim(
-                        ClaimTypes.Role,
-                        "Admin"));
-            }
-
-            var claims = claimsList.ToArray();
-
-            // JWT KEY
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(
@@ -156,28 +182,23 @@ namespace SportsBooking.API.Controllers
                 key,
                 SecurityAlgorithms.HmacSha256);
 
-
-            // CREATE TOKEN
+            var expiryMinutes = double.TryParse(
+                _configuration["Jwt:ExpiryMinutes"],
+                out var minutes)
+                ? minutes
+                : 60;
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
-
                 audience: _configuration["Jwt:Audience"],
-
-                claims: claims,
-
-                expires: DateTime.UtcNow.AddMinutes(
-                    double.Parse(
-                        _configuration["Jwt:ExpiryMinutes"]!)),
-
+                claims: claimsList,
+                expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
                 signingCredentials: credentials
             );
 
             var tokenString =
                 new JwtSecurityTokenHandler()
                     .WriteToken(token);
-
-            // LOGIN RESPONSE
 
             return Ok(new
             {
@@ -191,7 +212,8 @@ namespace SportsBooking.API.Controllers
                     name = member.Name,
                     email = member.Email,
                     phone = member.Phone,
-                    status = member.Status
+                    status = member.Status,
+                    role = userRole
                 }
             });
         }

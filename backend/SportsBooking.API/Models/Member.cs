@@ -42,6 +42,11 @@ public partial class Member
     [Precision(6)]
     public DateTime CreatedAt { get; set; }
 
+    [Column("USER_ROLE")]
+    [StringLength(20)]
+    [Unicode(false)]
+    public string UserRole { get; set; } = "Member";
+
     [InverseProperty("Member")]
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 

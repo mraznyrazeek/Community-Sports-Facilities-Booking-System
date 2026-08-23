@@ -1,0 +1,76 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev20c class="oracle.dbtools.crest.model.design.storage.oracle.v20c.TableProxyOraclev20c" name="SPORT" directorySegmentName="seg_0" id="F85610AE-C2B6-BC71-A871-3BB25EB76952">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:18 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<schemaObject>A48F502E-71D2-C509-378F-E176AC234953</schemaObject>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<segment>C2897223-9510-723C-810C-713EFC60CC56</segment>
+<tableSpace>C5119188-667E-0AEC-7C46-2FB47A6E7866</tableSpace>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<inMemory>NO</inMemory>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="SPORT_ID" id="5659257D-1FDC-C5F6-ABFD-69F7BAB8CEE2">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="SPORT_NAME" id="9FA31D26-753C-78EB-F508-028179A5354D">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DESCRIPTION" id="FDF69CCC-DA70-C03D-5958-6202099F76C6">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:19 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+</ColumnProxy>
+</columnProxies>
+<indexProxies>
+<IndexProxy class="oracle.dbtools.crest.model.design.storage.oracle.v10g.IndexProxyOraclev10g" name="UQ_SPORT_NAME" id="184909FA-35D6-3493-E5B4-81F8BF9B7572">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:24 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<schemaObject>A48F502E-71D2-C509-378F-E176AC234953</schemaObject>
+<segment>8AB7370F-752D-0C82-5DBB-6A4547CB96E5</segment>
+<tableSpace>C5119188-667E-0AEC-7C46-2FB47A6E7866</tableSpace>
+</IndexProxy>
+<IndexProxy class="oracle.dbtools.crest.model.design.storage.oracle.v10g.IndexProxyOraclev10g" name="PK_SPORT" id="53E6CE03-8420-BD7F-980D-F3D39AF4E868">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:24 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<schemaObject>A48F502E-71D2-C509-378F-E176AC234953</schemaObject>
+<segment>8AB7370F-752D-0C82-5DBB-6A4547CB96E5</segment>
+<tableSpace>C5119188-667E-0AEC-7C46-2FB47A6E7866</tableSpace>
+</IndexProxy>
+</indexProxies>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="PK_SPORT" id="68D75C93-8C90-9C15-3362-31059D394BE4">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:25 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<segment>8AB7370F-752D-0C82-5DBB-6A4547CB96E5</segment>
+<tableSpace>C5119188-667E-0AEC-7C46-2FB47A6E7866</tableSpace>
+<existingIndex>53E6CE03-8420-BD7F-980D-F3D39AF4E868</existingIndex>
+<indexSegment>8AB7370F-752D-0C82-5DBB-6A4547CB96E5</indexSegment>
+<indexSort>SORTED</indexSort>
+<usingIndex>BY INDEX NAME</usingIndex>
+</PrimaryKey>
+</primaryKeys>
+<uniqueKeys>
+<UniqueKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.UniqueOraclev10g" name="UQ_SPORT_NAME" id="876EB6B3-AFF0-9202-07AF-FD5E12A0950E">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-08-23 12:30:25 UTC</createdTime>
+<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
+<segment>8AB7370F-752D-0C82-5DBB-6A4547CB96E5</segment>
+<tableSpace>C5119188-667E-0AEC-7C46-2FB47A6E7866</tableSpace>
+<existingIndex>184909FA-35D6-3493-E5B4-81F8BF9B7572</existingIndex>
+<indexSegment>8AB7370F-752D-0C82-5DBB-6A4547CB96E5</indexSegment>
+<indexSort>SORTED</indexSort>
+<usingIndex>BY INDEX NAME</usingIndex>
+</UniqueKey>
+</uniqueKeys>
+</TableProxyOraclev20c>
