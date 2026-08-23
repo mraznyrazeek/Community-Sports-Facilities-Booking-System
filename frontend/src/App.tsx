@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import type { ReactNode } from "react";
 
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+
 import Dashboard from "./pages/Dashboard";
 import Facilities from "./pages/Facilities";
 import Sports from "./pages/Sports";
@@ -11,141 +13,123 @@ import MySports from "./pages/MySports";
 import Reviews from "./pages/Reviews";
 import Inquiries from "./pages/Inquiries";
 import Profile from "./pages/Profile";
+import FacilityDetails from "./pages/FacilityDetails";
 
 import { isAuthenticated } from "./services/api";
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+    children: ReactNode;
 }
 
 function ProtectedRoute({ children }: ProtectedRouteProps) {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
+    if (!isAuthenticated()) {
+        return <Navigate to="/login" replace />;
+    }
 
-  return <>{children}</>;
+    return <>{children}</>;
 }
 
-function App() {
-  const authenticated = isAuthenticated();
+export default function App() {
+    return (
+        <BrowserRouter>
+            <Routes>
 
-  return (
-    <BrowserRouter>
-      <Routes>
+                {/* ==============================
+                    PUBLIC ROUTES
+                ============================== */}
 
-        {/* PUBLIC ROUTES */}
+                <Route
+                    path="/"
+                    element={<Home />}
+                />
 
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+                <Route
+                    path="/sports"
+                    element={<Sports />}
+                />
 
-        <Route
-          path="/register"
-          element={<Register />}
-        />
+                <Route
+                    path="/facilities"
+                    element={<Facilities />}
+                />
 
-        {/* PROTECTED ROUTES */}
+                <Route
+                    path="/facility/:id"
+                    element={<FacilityDetails />}
+                />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+                <Route
+                    path="/reviews"
+                    element={<Reviews />}
+                />
 
-        <Route
-          path="/facilities"
-          element={
-            <ProtectedRoute>
-              <Facilities />
-            </ProtectedRoute>
-          }
-        />
+                <Route
+                    path="/inquiries"
+                    element={<Inquiries />}
+                />
 
-        <Route
-          path="/sports"
-          element={
-            <ProtectedRoute>
-              <Sports />
-            </ProtectedRoute>
-          }
-        />
+                <Route
+                    path="/login"
+                    element={<Login />}
+                />
 
-        <Route
-          path="/bookings"
-          element={
-            <ProtectedRoute>
-              <MyBookings />
-            </ProtectedRoute>
-          }
-        />
+                <Route
+                    path="/register"
+                    element={<Register />}
+                />
 
-        <Route
-          path="/my-sports"
-          element={
-            <ProtectedRoute>
-              <MySports />
-            </ProtectedRoute>
-          }
-        />
 
-        <Route
-          path="/reviews"
-          element={
-            <ProtectedRoute>
-              <Reviews />
-            </ProtectedRoute>
-          }
-        />
+                {/* ==============================
+                    MEMBER ROUTES
+                ============================== */}
 
-        <Route
-          path="/inquiries"
-          element={
-            <ProtectedRoute>
-              <Inquiries />
-            </ProtectedRoute>
-          }
-        />
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
 
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
+                <Route
+                    path="/bookings"
+                    element={
+                        <ProtectedRoute>
+                            <MyBookings />
+                        </ProtectedRoute>
+                    }
+                />
 
-        {/* DEFAULT ROUTE */}
+                <Route
+                    path="/my-sports"
+                    element={
+                        <ProtectedRoute>
+                            <MySports />
+                        </ProtectedRoute>
+                    }
+                />
 
-        <Route
-          path="/"
-          element={
-            <Navigate
-              to={authenticated ? "/dashboard" : "/login"}
-              replace
-            />
-          }
-        />
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <Profile />
+                        </ProtectedRoute>
+                    }
+                />
 
-        {/* UNKNOWN ROUTES */}
 
-        <Route
-          path="*"
-          element={
-            <Navigate
-              to={authenticated ? "/dashboard" : "/login"}
-              replace
-            />
-          }
-        />
+                {/* ==============================
+                    UNKNOWN ROUTES
+                ============================== */}
 
-      </Routes>
-    </BrowserRouter>
-  );
+                <Route
+                    path="*"
+                    element={<Navigate to="/" replace />}
+                />
+
+            </Routes>
+        </BrowserRouter>
+    );
 }
-
-export default App;
