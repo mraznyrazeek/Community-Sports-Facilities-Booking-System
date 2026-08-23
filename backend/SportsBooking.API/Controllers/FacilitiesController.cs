@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportsBooking.API.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SportsBooking.API.Controllers
 {
@@ -17,8 +17,6 @@ namespace SportsBooking.API.Controllers
             _context = context;
         }
 
-        // GET: api/Facilities
-        // All authenticated users can view facilities
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetFacilities()
         {
@@ -35,20 +33,20 @@ namespace SportsBooking.API.Controllers
                     closingTime = f.ClosingTime,
                     status = f.Status,
 
-                    sport = f.Sport == null ? null : new
-                    {
-                        sportId = f.Sport.SportId,
-                        sportName = f.Sport.SportName,
-                        description = f.Sport.Description
-                    }
+                    sport = f.Sport == null
+                        ? null
+                        : new
+                        {
+                            sportId = f.Sport.SportId,
+                            sportName = f.Sport.SportName,
+                            description = f.Sport.Description
+                        }
                 })
                 .ToListAsync();
 
             return Ok(facilities);
         }
 
-        // GET: api/Facilities/5
-        // All authenticated users can view a facility
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> GetFacility(decimal id)
         {
@@ -66,31 +64,41 @@ namespace SportsBooking.API.Controllers
                     closingTime = f.ClosingTime,
                     status = f.Status,
 
-                    sport = f.Sport == null ? null : new
-                    {
-                        sportId = f.Sport.SportId,
-                        sportName = f.Sport.SportName,
-                        description = f.Sport.Description
-                    }
+                    sport = f.Sport == null
+                        ? null
+                        : new
+                        {
+                            sportId = f.Sport.SportId,
+                            sportName = f.Sport.SportName,
+                            description = f.Sport.Description
+                        }
                 })
                 .FirstOrDefaultAsync();
 
             if (facility == null)
             {
-                return NotFound();
+                return NotFound(new
+                {
+                    message = "Facility not found."
+                });
             }
 
             return Ok(facility);
         }
 
-        // POST: api/Facilities
-        // Admin only
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Facility>> PostFacility(
+        public async Task<ActionResult<object>> PostFacility(
             Facility facility)
         {
-            // Make sure the referenced sport exists
+            if (facility == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Facility data is required."
+                });
+            }
+
             var sportExists = await _context.Sports
                 .AnyAsync(s => s.SportId == facility.SportId);
 
@@ -102,24 +110,79 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
+            var duplicateName = await _context.Facilities
+                .AnyAsync(f =>
+                    f.FacilityName.ToLower() ==
+                    facility.FacilityName.ToLower());
+
+            if (duplicateName)
+            {
+                return Conflict(new
+                {
+                    message = "A facility with this name already exists."
+                });
+            }
+
+            var maxId = await _context.Facilities
+                .Select(f => (decimal?)f.FacilityId)
+                .MaxAsync() ?? 0;
+
+            facility.FacilityId = maxId + 1;
+
+            if (string.IsNullOrWhiteSpace(facility.Status))
+            {
+                facility.Status = "Active";
+            }
+
             _context.Facilities.Add(facility);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return Conflict(new
+                {
+                    message = "The facility could not be created. The facility ID may already exist."
+                });
+            }
 
             return CreatedAtAction(
                 nameof(GetFacility),
-                new { id = facility.FacilityId },
-                facility
+                new
+                {
+                    id = facility.FacilityId
+                },
+                new
+                {
+                    facilityId = facility.FacilityId,
+                    sportId = facility.SportId,
+                    facilityName = facility.FacilityName,
+                    description = facility.Description,
+                    location = facility.Location,
+                    address = facility.Address,
+                    openingTime = facility.OpeningTime,
+                    closingTime = facility.ClosingTime,
+                    status = facility.Status
+                }
             );
         }
 
-        // PUT: api/Facilities/5
-        // Admin only
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutFacility(
             decimal id,
             Facility facility)
         {
+            if (facility == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Facility data is required."
+                });
+            }
+
             if (id != facility.FacilityId)
             {
                 return BadRequest(new
@@ -133,10 +196,12 @@ namespace SportsBooking.API.Controllers
 
             if (existingFacility == null)
             {
-                return NotFound();
+                return NotFound(new
+                {
+                    message = "Facility not found."
+                });
             }
 
-            // Make sure the referenced sport exists
             var sportExists = await _context.Sports
                 .AnyAsync(s => s.SportId == facility.SportId);
 
@@ -145,6 +210,20 @@ namespace SportsBooking.API.Controllers
                 return BadRequest(new
                 {
                     message = "The specified sport does not exist."
+                });
+            }
+
+            var duplicateName = await _context.Facilities
+                .AnyAsync(f =>
+                    f.FacilityId != id &&
+                    f.FacilityName.ToLower() ==
+                    facility.FacilityName.ToLower());
+
+            if (duplicateName)
+            {
+                return Conflict(new
+                {
+                    message = "Another facility already uses this name."
                 });
             }
 
@@ -157,13 +236,21 @@ namespace SportsBooking.API.Controllers
             existingFacility.ClosingTime = facility.ClosingTime;
             existingFacility.Status = facility.Status;
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return Conflict(new
+                {
+                    message = "The facility could not be updated."
+                });
+            }
 
             return NoContent();
         }
 
-        // DELETE: api/Facilities/5
-        // Admin only
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteFacility(decimal id)
@@ -173,11 +260,36 @@ namespace SportsBooking.API.Controllers
 
             if (facility == null)
             {
-                return NotFound();
+                return NotFound(new
+                {
+                    message = "Facility not found."
+                });
+            }
+
+            var hasBookings = await _context.Bookings
+                .AnyAsync(b => b.FacilityId == id);
+
+            if (hasBookings)
+            {
+                return Conflict(new
+                {
+                    message = "This facility cannot be deleted because it has existing bookings. Please set the facility status to Inactive instead."
+                });
             }
 
             _context.Facilities.Remove(facility);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return Conflict(new
+                {
+                    message = "This facility cannot be deleted because it is referenced by other records."
+                });
+            }
 
             return NoContent();
         }
