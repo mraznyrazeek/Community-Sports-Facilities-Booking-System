@@ -15,6 +15,7 @@ import Members from "./pages/Members";
 import Reviews from "./pages/Reviews";
 import Inquiries from "./pages/Inquiries";
 import Settings from "./pages/Settings";
+import MemberSports from "./pages/MemberSports";
 
 import { isAuthenticated } from "./services/api";
 
@@ -73,6 +74,10 @@ export default function App() {
           path="/members"
           element={<Members />}
         />
+        <Route
+          path="/member-sports"
+          element={<MemberSports />}
+        />
 
         <Route
           path="/reviews"
@@ -84,14 +89,14 @@ export default function App() {
           element={<Inquiries />}
         />
 
-         <Route
-        path="/settings"
-        element={<Settings />}
-      />
-      
+        <Route
+          path="/settings"
+          element={<Settings />}
+        />
+
       </Route>
 
-     
+
 
       {/* Unknown routes */}
       <Route

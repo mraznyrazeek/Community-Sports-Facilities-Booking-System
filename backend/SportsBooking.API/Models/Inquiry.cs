@@ -45,7 +45,21 @@ public partial class Inquiry
     [Precision(6)]
     public DateTime CreatedAt { get; set; }
 
+    [Column("ADMIN_RESPONSE")]
+    [StringLength(2000)]
+    [Unicode(false)]
+    public string? AdminResponse { get; set; }
+
+    [Column("RESPONDED_AT")]
+    [Precision(6)]
+    public DateTime? RespondedAt { get; set; }
+
     [ForeignKey("MemberId")]
     [InverseProperty("Inquiries")]
     public virtual Member Member { get; set; } = null!;
+
+
+    [InverseProperty("Inquiry")]
+    public virtual ICollection<InquiryResponse> Responses { get; set; }
+        = new List<InquiryResponse>();
 }

@@ -11,8 +11,13 @@ import {
   Users,
   X,
 } from "lucide-react";
+
 import { NavLink } from "react-router-dom";
-import { getAdminMember, logout } from "../services/api";
+
+import {
+  getAdminMember,
+  logout,
+} from "../services/api";
 
 const navigation = [
   {
@@ -20,31 +25,43 @@ const navigation = [
     path: "/dashboard",
     icon: BarChart3,
   },
+
   {
     label: "Sports",
     path: "/sports",
     icon: Trophy,
   },
+
   {
     label: "Facilities",
     path: "/facilities",
     icon: Building2,
   },
+
   {
     label: "Bookings",
     path: "/bookings",
     icon: CalendarDays,
   },
+
   {
     label: "Members",
     path: "/members",
     icon: Users,
   },
+
+  {
+    label: "Member Sports",
+    path: "/member-sports",
+    icon: Trophy,
+  },
+
   {
     label: "Reviews",
     path: "/reviews",
     icon: Star,
   },
+
   {
     label: "Inquiries",
     path: "/inquiries",
@@ -63,7 +80,8 @@ export default function AdminSidebar({
 }: AdminSidebarProps) {
   const admin = getAdminMember();
 
-  const adminName = admin?.name || "Administrator";
+  const adminName =
+    admin?.name || "Administrator";
 
   const firstLetter =
     adminName.charAt(0).toUpperCase() || "A";
@@ -81,13 +99,20 @@ export default function AdminSidebar({
       }`}
     >
       {/* Logo */}
+
       <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-slate-800 px-5">
+
         <div className="flex items-center gap-3">
+
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/20">
-            <Trophy size={22} strokeWidth={2.2} />
+            <Trophy
+              size={22}
+              strokeWidth={2.2}
+            />
           </div>
 
           <div>
+
             <h1 className="text-lg font-bold tracking-tight text-white">
               SportsHub
             </h1>
@@ -95,10 +120,13 @@ export default function AdminSidebar({
             <p className="text-[11px] font-medium text-slate-400">
               Admin Panel
             </p>
+
           </div>
+
         </div>
 
         {/* Mobile close button */}
+
         <button
           type="button"
           aria-label="Close navigation"
@@ -107,17 +135,23 @@ export default function AdminSidebar({
         >
           <X size={19} />
         </button>
+
       </div>
 
       {/* Navigation */}
+
       <nav className="flex-1 min-h-0 overflow-hidden px-3 py-4">
+
         {/* Management */}
+
         <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
           Management
         </p>
 
         <div className="space-y-0.5">
+
           {navigation.map((item) => {
+
             const Icon = item.icon;
 
             return (
@@ -133,16 +167,21 @@ export default function AdminSidebar({
                   }`
                 }
               >
+
                 {({ isActive }) => (
                   <>
+
                     {/* Active indicator */}
+
                     {isActive && (
                       <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-blue-400" />
                     )}
 
                     <Icon
                       size={19}
-                      strokeWidth={isActive ? 2.3 : 2}
+                      strokeWidth={
+                        isActive ? 2.3 : 2
+                      }
                       className={`transition ${
                         isActive
                           ? "text-white"
@@ -150,15 +189,21 @@ export default function AdminSidebar({
                       }`}
                     />
 
-                    <span>{item.label}</span>
+                    <span>
+                      {item.label}
+                    </span>
+
                   </>
                 )}
+
               </NavLink>
             );
           })}
+
         </div>
 
         {/* System */}
+
         <p className="mb-3 mt-5 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
           System
         </p>
@@ -174,16 +219,21 @@ export default function AdminSidebar({
             }`
           }
         >
+
           {({ isActive }) => (
             <>
+
               {/* Active indicator */}
+
               {isActive && (
                 <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-blue-400" />
               )}
 
               <Settings
                 size={19}
-                strokeWidth={isActive ? 2.3 : 2}
+                strokeWidth={
+                  isActive ? 2.3 : 2
+                }
                 className={
                   isActive
                     ? "text-white"
@@ -191,26 +241,37 @@ export default function AdminSidebar({
                 }
               />
 
-              <span>Settings</span>
+              <span>
+                Settings
+              </span>
+
             </>
           )}
+
         </NavLink>
+
       </nav>
 
       {/* User section */}
+
       <div className="shrink-0 border-t border-slate-800 p-3">
+
         <NavLink
           to="/profile"
           onClick={onClose}
           className="mb-2 flex items-center gap-3 rounded-xl bg-slate-800 p-2.5 transition hover:bg-slate-700"
         >
+
           {/* Avatar */}
+
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 font-bold text-white">
             {firstLetter}
           </div>
 
           {/* User information */}
+
           <div className="min-w-0 flex-1">
+
             <p className="truncate text-sm font-semibold text-white">
               {adminName}
             </p>
@@ -218,25 +279,34 @@ export default function AdminSidebar({
             <p className="truncate text-xs text-slate-400">
               Administrator
             </p>
+
           </div>
 
           <ChevronRight
             size={16}
             className="shrink-0 text-slate-400"
           />
+
         </NavLink>
 
         {/* Sign out */}
+
         <button
           type="button"
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
         >
+
           <LogOut size={19} />
 
-          <span>Sign Out</span>
+          <span>
+            Sign Out
+          </span>
+
         </button>
+
       </div>
+
     </aside>
   );
 }

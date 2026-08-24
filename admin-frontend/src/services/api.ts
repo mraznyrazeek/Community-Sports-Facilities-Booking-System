@@ -83,8 +83,9 @@ export type Inquiry = {
   email: string;
   subject: string;
   message: string;
-  status: string;
+  status: "Pending" | "In Progress" | "Resolved";
   createdAt: string;
+  responses?: InquiryResponse[];
 };
 
 export type LoginResponse = {
@@ -217,9 +218,7 @@ export function getAdminMember(): Member | null {
 export async function changePassword(
   currentPassword: string,
   newPassword: string
-) 
-
-{
+) {
   return request<{ message: string }>(
     "/Auth/change-password",
     {
@@ -336,6 +335,18 @@ export async function deleteSport(id: number) {
   });
 }
 
+export type MemberSport = {
+  memberId: number;
+  sportId: number;
+  joinedAt: string;
+
+  sport?: {
+    sportId: number;
+    sportName: string;
+    description?: string | null;
+  } | null;
+};
+
 
 export async function getFacilities() {
   return request<Facility[]>("/Facilities");
@@ -412,6 +423,33 @@ export async function deleteBooking(id: number) {
   });
 }
 
+export async function getMemberSports(memberId: number) {
+  return request<MemberSport[]>(
+    `/MemberSports/member/${memberId}`
+  );
+}
+
+export async function addMemberSport(sportId: number) {
+  return request<MemberSport>("/MemberSports", {
+    method: "POST",
+    body: JSON.stringify({
+      sportId,
+    }),
+  });
+}
+
+export async function deleteMemberSport(
+  memberId: number,
+  sportId: number
+) {
+  return request<void>(
+    `/MemberSports/member/${memberId}/sport/${sportId}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+
 
 export async function getReviews() {
   return request<Review[]>("/Reviews");
@@ -440,6 +478,15 @@ export async function deleteReview(id: number) {
   });
 }
 
+export type InquiryResponse = {
+  responseId: number;
+  inquiryId: number;
+  senderRole: "Admin" | "Member";
+  message: string;
+  createdAt: string;
+};
+
+
 export async function getInquiries() {
   return request<Inquiry[]>("/Inquiries");
 }
@@ -450,7 +497,11 @@ export async function getInquiry(id: number) {
 
 export async function updateInquiry(
   id: number,
-  data: Inquiry
+  data: {
+    subject: string;
+    message: string;
+    status?: "Pending" | "In Progress" | "Resolved";
+  }
 ) {
   return request<void>(`/Inquiries/${id}`, {
     method: "PUT",
@@ -462,4 +513,35 @@ export async function deleteInquiry(id: number) {
   return request<void>(`/Inquiries/${id}`, {
     method: "DELETE",
   });
+}
+
+export async function getInquiryResponses(
+  inquiryId: number
+) {
+  return request<InquiryResponse[]>(
+    `/InquiryResponses/inquiry/${inquiryId}`
+  );
+}
+
+export async function getInquiryResponse(
+  responseId: number
+) {
+  return request<InquiryResponse>(
+    `/InquiryResponses/${responseId}`
+  );
+}
+
+export async function createInquiryResponse(
+  inquiryId: number,
+  message: string
+) {
+  return request<InquiryResponse>(
+    `/InquiryResponses/inquiry/${inquiryId}`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        message,
+      }),
+    }
+  );
 }

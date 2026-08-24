@@ -8,6 +8,7 @@ import {
   Users,
   Trash2,
   Pencil,
+  Trophy,
   Search,
   X,
   ShieldCheck,
@@ -24,13 +25,27 @@ import {
   updateMember,
   deleteMember,
   getAdminMember,
+  getMemberSports,
   type Member,
+  type MemberSport,
 } from "../services/api";
 
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
 export default function Members() {
   const currentAdmin = getAdminMember();
+
+  const [showSportsModal, setShowSportsModal] =
+    useState(false);
+
+  const [selectedMember, setSelectedMember] =
+    useState<Member | null>(null);
+
+  const [memberSports, setMemberSports] =
+    useState<MemberSport[]>([]);
+
+  const [loadingSports, setLoadingSports] =
+    useState(false);
 
   const [members, setMembers] =
     useState<Member[]>([]);
@@ -315,6 +330,44 @@ export default function Members() {
         "Unable to delete member."
       );
     }
+  };
+
+  const openSportsModal = async (
+    member: Member
+  ) => {
+    try {
+      setSelectedMember(member);
+      setShowSportsModal(true);
+      setLoadingSports(true);
+
+      const data = await getMemberSports(
+        member.memberId
+      );
+
+      setMemberSports(data || []);
+    } catch (error: any) {
+      console.error(
+        "Failed to load member sports:",
+        error
+      );
+
+      alert(
+        error?.message ||
+        "Unable to load member sports."
+      );
+    } finally {
+      setLoadingSports(false);
+    }
+  };
+
+  const closeSportsModal = () => {
+    if (loadingSports) {
+      return;
+    }
+
+    setShowSportsModal(false);
+    setSelectedMember(null);
+    setMemberSports([]);
   };
 
   if (loading) {
@@ -804,6 +857,17 @@ export default function Members() {
                             <button
                               type="button"
                               onClick={() =>
+                                openSportsModal(member)
+                              }
+                              title="View joined sports"
+                              className="rounded-lg p-2 text-slate-400 transition hover:bg-emerald-50 hover:text-emerald-600"
+                            >
+                              <Trophy size={17} />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
                                 openEditModal(
                                   member
                                 )
@@ -847,7 +911,115 @@ export default function Members() {
           </table>
 
         </div>
+        {showSportsModal && selectedMember && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
 
+            <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">
+                    Joined Sports
+                  </h2>
+
+                  <p className="mt-1 text-xs text-slate-400">
+                    Sports registered by{" "}
+                    <span className="font-semibold text-slate-600">
+                      {selectedMember.name}
+                    </span>
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={closeSportsModal}
+                  className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                >
+                  <X size={19} />
+                </button>
+
+              </div>
+
+              {/* Content */}
+              <div className="max-h-[450px] overflow-y-auto p-6">
+
+                {loadingSports ? (
+
+                  <div className="flex items-center justify-center py-12">
+                    <LoadingSpinner text="Loading sports..." />
+                  </div>
+
+                ) : memberSports.length === 0 ? (
+
+                  <div className="py-12 text-center">
+
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <Trophy size={24} />
+                    </div>
+
+                    <p className="mt-4 font-semibold text-slate-700">
+                      No sports registered
+                    </p>
+
+                    <p className="mt-1 text-sm text-slate-400">
+                      This member has not joined any sports yet.
+                    </p>
+
+                  </div>
+
+                ) : (
+
+                  <div className="space-y-3">
+
+                    {memberSports.map((memberSport) => (
+
+                      <div
+                        key={`${memberSport.memberId}-${memberSport.sportId}`}
+                        className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4"
+                      >
+
+                        <div className="flex items-center gap-3">
+
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                            <Trophy size={18} />
+                          </div>
+
+                          <div>
+
+                            <p className="font-semibold text-slate-800">
+                              {memberSport.sport?.sportName ||
+                                "Unknown Sport"}
+                            </p>
+
+                            <p className="mt-1 text-xs text-slate-400">
+                              Joined{" "}
+                              {memberSport.joinedAt
+                                ? new Date(
+                                  memberSport.joinedAt
+                                ).toLocaleDateString("en-GB")
+                                : "—"}
+                            </p>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    ))}
+
+                  </div>
+
+                )}
+
+              </div>
+
+            </div>
+
+          </div>
+        )}
       </div>
 
       {showEditModal &&

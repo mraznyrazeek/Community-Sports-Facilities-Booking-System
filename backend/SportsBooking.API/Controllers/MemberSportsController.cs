@@ -51,6 +51,47 @@ namespace SportsBooking.API.Controllers
             return Ok(memberSports);
         }
 
+        // GET: api/MemberSports/member/10
+        // Admin can view sports joined by a specific member
+        [HttpGet("member/{memberId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<object>>> GetMemberSportsByMember(
+            decimal memberId)
+        {
+            var memberExists = await _context.Members
+                .AnyAsync(m => m.MemberId == memberId);
+
+            if (!memberExists)
+            {
+                return NotFound(new
+                {
+                    message = "Member not found."
+                });
+            }
+
+            var memberSports = await _context.MemberSports
+                .Include(ms => ms.Sport)
+                .Where(ms => ms.MemberId == memberId)
+                .Select(ms => new
+                {
+                    memberId = ms.MemberId,
+                    sportId = ms.SportId,
+                    joinedAt = ms.JoinedAt,
+
+                    sport = ms.Sport == null ? null : new
+                    {
+                        sportId = ms.Sport.SportId,
+                        sportName = ms.Sport.SportName,
+                        description = ms.Sport.Description
+                    }
+                })
+                .ToListAsync();
+
+            return Ok(memberSports);
+        }
+
+
+
         // GET: api/MemberSports/1
         [HttpGet("{sportId}")]
         public async Task<ActionResult<object>> GetMemberSport(decimal sportId)
@@ -217,6 +258,35 @@ namespace SportsBooking.API.Controllers
             }
 
             return null;
+        }
+
+
+        // DELETE: api/MemberSports/member/13/sport/1
+        // Admin can remove a sport from a specific member
+        [HttpDelete("member/{memberId:decimal}/sport/{sportId:decimal}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteMemberSportForAdmin(
+            decimal memberId,
+            decimal sportId)
+        {
+            var memberSport = await _context.MemberSports
+                .FirstOrDefaultAsync(ms =>
+                    ms.MemberId == memberId &&
+                    ms.SportId == sportId);
+
+            if (memberSport == null)
+            {
+                return NotFound(new
+                {
+                    message = "This sport is not registered for this member."
+                });
+            }
+
+            _context.MemberSports.Remove(memberSport);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 
