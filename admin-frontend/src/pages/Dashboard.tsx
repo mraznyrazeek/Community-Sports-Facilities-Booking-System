@@ -40,11 +40,6 @@ import {
   Tooltip,
 } from "recharts";
 
-
-/* =========================================================
-   TYPES
-========================================================= */
-
 type ActivityType =
   | "booking"
   | "member"
@@ -60,25 +55,6 @@ type Activity = {
 };
 
 
-/* =========================================================
-   DATE HELPERS
-========================================================= */
-
-/*
- * Converts the API booking date + start time into a LOCAL
- * JavaScript Date.
- *
- * Handles examples such as:
- *
- * bookingDate = "2026-08-26"
- * startTime   = "18:00:00"
- *
- * bookingDate = "2026-08-26T00:00:00"
- * startTime   = "18:00:00"
- *
- * bookingDate = "2026-08-26T00:00:00.000Z"
- * startTime   = "18:00"
- */
 function getBookingDateTime(
   bookingDate: string,
   startTime: string
@@ -131,15 +107,6 @@ function getBookingDateTime(
       return null;
     }
 
-    /*
-     * IMPORTANT:
-     *
-     * Using the Date constructor with separate values
-     * creates the date in the user's LOCAL timezone.
-     *
-     * This avoids timezone problems caused by:
-     * new Date("2026-08-26T18:00:00")
-     */
     return new Date(
       year,
       month - 1,
@@ -153,11 +120,6 @@ function getBookingDateTime(
     return null;
   }
 }
-
-
-/* =========================================================
-   DATE FORMAT
-========================================================= */
 
 function formatBookingDate(
   bookingDate: string
@@ -198,11 +160,6 @@ function formatBookingDate(
   );
 }
 
-
-/* =========================================================
-   TIME FORMAT
-========================================================= */
-
 function formatBookingTime(
   time: string
 ): string {
@@ -240,17 +197,12 @@ function formatBookingTime(
   );
 }
 
-
-/* =========================================================
-   STATUS STYLES
-========================================================= */
-
 function getBookingStatusStyles(
   status: string
 ) {
 
   switch (
-    status?.toLowerCase()
+  status?.toLowerCase()
   ) {
 
     case "confirmed":
@@ -287,11 +239,6 @@ function getBookingStatusStyles(
   }
 }
 
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
 export default function Dashboard() {
 
   const [stats, setStats] =
@@ -317,11 +264,6 @@ export default function Dashboard() {
   const [loading, setLoading] =
     useState(true);
 
-
-  /* =======================================================
-     LOAD DASHBOARD
-  ======================================================= */
-
   useEffect(() => {
 
     async function loadDashboard() {
@@ -344,11 +286,6 @@ export default function Dashboard() {
           getInquiries(),
         ]);
 
-
-        /* ===============================================
-           STATS
-        =============================================== */
-
         setStats({
           facilities:
             facilitiesData?.length || 0,
@@ -362,11 +299,6 @@ export default function Dashboard() {
           members:
             membersData?.length || 0,
         });
-
-
-        /* ===============================================
-           SAVE DATA
-        =============================================== */
 
         setBookings(
           bookingsData || []
@@ -403,11 +335,6 @@ export default function Dashboard() {
     loadDashboard();
 
   }, []);
-
-
-  /* =======================================================
-     UPCOMING BOOKINGS
-  ======================================================= */
 
   const upcomingBookings =
     useMemo(() => {
@@ -490,11 +417,6 @@ export default function Dashboard() {
 
     }, [bookings]);
 
-
-  /* =======================================================
-     MONTH NAMES
-  ======================================================= */
-
   const monthNames = [
     "Jan",
     "Feb",
@@ -509,11 +431,6 @@ export default function Dashboard() {
     "Nov",
     "Dec",
   ];
-
-
-  /* =======================================================
-     LAST 12 MONTHS
-  ======================================================= */
 
   const last12Months =
     useMemo(() => {
@@ -552,7 +469,7 @@ export default function Dashboard() {
 
           label:
             monthNames[
-              date.getMonth()
+            date.getMonth()
             ],
 
           year:
@@ -569,11 +486,6 @@ export default function Dashboard() {
       return months;
 
     }, []);
-
-
-  /* =======================================================
-     MONTHLY BOOKINGS
-  ======================================================= */
 
   const monthlyBookings =
     useMemo(() => {
@@ -609,7 +521,7 @@ export default function Dashboard() {
                 return (
                   year === month.year &&
                   monthNumber - 1 ===
-                    month.month
+                  month.month
                 );
 
               }
@@ -631,11 +543,6 @@ export default function Dashboard() {
       bookings,
       last12Months,
     ]);
-
-
-  /* =======================================================
-     MONTHLY MEMBERS
-  ======================================================= */
 
   const monthlyMembers =
     useMemo(() => {
@@ -662,9 +569,9 @@ export default function Dashboard() {
 
                 return (
                   date.getFullYear() ===
-                    month.year &&
+                  month.year &&
                   date.getMonth() ===
-                    month.month
+                  month.month
                 );
 
               }
@@ -686,11 +593,6 @@ export default function Dashboard() {
       members,
       last12Months,
     ]);
-
-
-  /* =======================================================
-     CHART TOTALS
-  ======================================================= */
 
   const bookingChartTotal =
     monthlyBookings.reduce(
@@ -714,11 +616,6 @@ export default function Dashboard() {
         item.members,
       0
     );
-
-
-  /* =======================================================
-     RECENT ACTIVITY
-  ======================================================= */
 
   const recentActivities =
     useMemo<Activity[]>(() => {
@@ -867,11 +764,6 @@ export default function Dashboard() {
       inquiries,
     ]);
 
-
-  /* =======================================================
-     ACTIVITY ICON
-  ======================================================= */
-
   const getActivityIcon = (
     type: ActivityType
   ) => {
@@ -916,11 +808,6 @@ export default function Dashboard() {
     }
 
   };
-
-
-  /* =======================================================
-     ACTIVITY STYLE
-  ======================================================= */
 
   const getActivityStyles = (
     type: ActivityType
@@ -972,11 +859,6 @@ export default function Dashboard() {
 
   };
 
-
-  /* =======================================================
-     ACTIVITY LABEL
-  ======================================================= */
-
   const getActivityLabel = (
     type: ActivityType
   ) => {
@@ -1001,11 +883,6 @@ export default function Dashboard() {
     }
 
   };
-
-
-  /* =======================================================
-     RELATIVE TIME
-  ======================================================= */
 
   const getRelativeTime = (
     date: string
@@ -1059,29 +936,26 @@ export default function Dashboard() {
 
 
     if (minutes < 60) {
-      return `${minutes} ${
-        minutes === 1
-          ? "minute"
-          : "minutes"
-      } ago`;
+      return `${minutes} ${minutes === 1
+        ? "minute"
+        : "minutes"
+        } ago`;
     }
 
 
     if (hours < 24) {
-      return `${hours} ${
-        hours === 1
-          ? "hour"
-          : "hours"
-      } ago`;
+      return `${hours} ${hours === 1
+        ? "hour"
+        : "hours"
+        } ago`;
     }
 
 
     if (days < 7) {
-      return `${days} ${
-        days === 1
-          ? "day"
-          : "days"
-      } ago`;
+      return `${days} ${days === 1
+        ? "day"
+        : "days"
+        } ago`;
     }
 
 
@@ -1097,11 +971,6 @@ export default function Dashboard() {
     );
 
   };
-
-
-  /* =======================================================
-     TOOLTIP
-  ======================================================= */
 
   const BookingTooltip = ({
     active,
@@ -1166,11 +1035,6 @@ export default function Dashboard() {
 
   };
 
-
-  /* =======================================================
-     LOADING
-  ======================================================= */
-
   if (loading) {
 
     return (
@@ -1181,41 +1045,21 @@ export default function Dashboard() {
 
   }
 
-
-  /* =======================================================
-     UI
-  ======================================================= */
-
   return (
 
     <div className="space-y-7">
 
-
-      {/* ===================================================
-          HEADER
-      =================================================== */}
-
       <div>
-
-        <p className="text-sm font-medium text-blue-600">
-          Administration
-        </p>
 
         <h1 className="mt-1 text-3xl font-bold tracking-tight text-gray-900">
           Dashboard
         </h1>
 
         <p className="mt-2 text-sm text-gray-500">
-          Overview of your community sports
-          platform.
+          Overview of the community sports platform
         </p>
 
       </div>
-
-
-      {/* ===================================================
-          STAT CARDS
-      =================================================== */}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 
@@ -1249,24 +1093,9 @@ export default function Dashboard() {
 
       </div>
 
-
-      {/* ===================================================
-          MAIN GRID
-      =================================================== */}
-
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(340px,0.75fr)]">
 
-
-        {/* =================================================
-            LEFT COLUMN
-        ================================================= */}
-
         <div className="space-y-5">
-
-
-          {/* =================================================
-              CHARTS
-          ================================================= */}
 
           <div className="grid gap-5 lg:grid-cols-2">
 
@@ -1514,11 +1343,6 @@ export default function Dashboard() {
 
           </div>
 
-
-          {/* =================================================
-              UPCOMING BOOKINGS
-          ================================================= */}
-
           <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
 
 
@@ -1764,11 +1588,6 @@ export default function Dashboard() {
           </div>
 
         </div>
-
-
-        {/* =================================================
-            RIGHT COLUMN
-        ================================================= */}
 
         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
 

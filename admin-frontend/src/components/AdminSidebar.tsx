@@ -3,6 +3,7 @@ import {
   Building2,
   CalendarDays,
   ChevronRight,
+  Dumbbell,
   LogOut,
   MessageSquare,
   Settings,
@@ -53,7 +54,7 @@ const navigation = [
   {
     label: "Member Sports",
     path: "/member-sports",
-    icon: Trophy,
+    icon: Dumbbell,
   },
 
   {
@@ -92,11 +93,10 @@ export default function AdminSidebar({
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-900 transition-transform duration-300 lg:translate-x-0 ${
-        mobileOpen
+      className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-900 transition-transform duration-300 lg:translate-x-0 ${mobileOpen
           ? "translate-x-0"
           : "-translate-x-full"
-      }`}
+        }`}
     >
       {/* Logo */}
 
@@ -160,10 +160,9 @@ export default function AdminSidebar({
                 to={item.path}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 ${
-                    isActive
-                      ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 ${isActive
+                    ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`
                 }
               >
@@ -182,11 +181,10 @@ export default function AdminSidebar({
                       strokeWidth={
                         isActive ? 2.3 : 2
                       }
-                      className={`transition ${
-                        isActive
+                      className={`transition ${isActive
                           ? "text-white"
                           : "text-slate-400 group-hover:text-white"
-                      }`}
+                        }`}
                     />
 
                     <span>
@@ -212,10 +210,9 @@ export default function AdminSidebar({
           to="/settings"
           onClick={onClose}
           className={({ isActive }) =>
-            `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
-              isActive
-                ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
-                : "text-slate-300 hover:bg-slate-800 hover:text-white"
+            `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${isActive
+              ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
+              : "text-slate-300 hover:bg-slate-800 hover:text-white"
             }`
           }
         >

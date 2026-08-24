@@ -467,10 +467,6 @@ export default function Members() {
       {/* Page Header */}
 
       <div>
-        <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
-          <Users size={16} />
-          Management
-        </div>
 
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
           Members
@@ -863,8 +859,8 @@ export default function Members() {
 
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${isAdmin
-                                ? "bg-purple-50 text-purple-600"
-                                : "bg-blue-50 text-blue-600"
+                              ? "bg-purple-50 text-purple-600"
+                              : "bg-blue-50 text-blue-600"
                               }`}
                           >
 
@@ -893,15 +889,15 @@ export default function Members() {
 
                           <span
                             className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${isActive
-                                ? "bg-emerald-50 text-emerald-600"
-                                : "bg-slate-100 text-slate-500"
+                              ? "bg-emerald-50 text-emerald-600"
+                              : "bg-slate-100 text-slate-500"
                               }`}
                           >
 
                             <span
                               className={`h-1.5 w-1.5 rounded-full ${isActive
-                                  ? "bg-emerald-500"
-                                  : "bg-slate-400"
+                                ? "bg-emerald-500"
+                                : "bg-slate-400"
                                 }`}
                             />
 
@@ -1090,8 +1086,8 @@ export default function Members() {
                         )
                       }
                       className={`h-9 min-w-9 rounded-lg px-3 text-sm font-medium transition ${memberPage === page
-                          ? "bg-blue-600 text-white"
-                          : "text-slate-600 hover:bg-slate-100"
+                        ? "bg-blue-600 text-white"
+                        : "text-slate-600 hover:bg-slate-100"
                         }`}
                     >
                       {page}
@@ -1415,8 +1411,8 @@ export default function Members() {
                         isEditingCurrentAdmin
                       }
                       className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${isEditingCurrentAdmin
-                          ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
-                          : "border-slate-200 bg-white text-slate-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                        ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                        : "border-slate-200 bg-white text-slate-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                         }`}
                     >
                       <option value="Member">
@@ -1462,8 +1458,8 @@ export default function Members() {
                         isEditingCurrentAdmin
                       }
                       className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${isEditingCurrentAdmin
-                          ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
-                          : "border-slate-200 bg-white text-slate-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                        ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                        : "border-slate-200 bg-white text-slate-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                         }`}
                     >
                       <option value="Active">

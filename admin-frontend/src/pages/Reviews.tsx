@@ -287,7 +287,7 @@ export default function Reviews() {
     <div>
       {/* Page Header */}
       <div>
-        <p className="text-sm font-medium text-blue-600">
+        <p className="mt-2 text-sm text-gray-500">
           Community
         </p>
 

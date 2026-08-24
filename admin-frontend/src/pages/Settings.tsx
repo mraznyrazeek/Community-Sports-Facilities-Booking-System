@@ -430,10 +430,6 @@ export default function Settings() {
     }
   }
 
-  // ==========================================================
-  // DELETE ADMIN
-  // ==========================================================
-
   async function handleDeleteAdmin(
     adminMember: AdminMember
   ) {
@@ -497,18 +493,11 @@ export default function Settings() {
     }
   }
 
-  // ==========================================================
-  // RENDER
-  // ==========================================================
 
   return (
     <div className="space-y-6">
 
       <div>
-        <p className="text-sm font-semibold text-blue-600">
-          Administration
-        </p>
-
         <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
           Settings
         </h1>

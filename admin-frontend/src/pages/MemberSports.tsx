@@ -235,11 +235,6 @@ export default function MemberSports() {
     <div className="space-y-7">
 
       <div>
-        <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
-          <Trophy size={16} />
-
-          Management
-        </div>
 
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
           Member Sports
@@ -467,8 +462,8 @@ export default function MemberSports() {
                           )
                         }
                         className={`h-9 min-w-9 rounded-lg px-3 text-sm font-medium transition ${memberPage === page
-                            ? "bg-blue-600 text-white"
-                            : "text-slate-600 hover:bg-slate-100"
+                          ? "bg-blue-600 text-white"
+                          : "text-slate-600 hover:bg-slate-100"
                           }`}
                       >
                         {page}

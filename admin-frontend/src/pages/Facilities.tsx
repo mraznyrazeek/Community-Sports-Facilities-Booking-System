@@ -239,10 +239,6 @@ export default function Facilities() {
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
   <div>
-    <p className="flex items-center gap-2 text-sm font-semibold text-blue-600">
-      <Building2 size={18} />
-      Community Management
-    </p>
 
     <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
       Facilities

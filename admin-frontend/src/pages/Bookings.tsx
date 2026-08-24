@@ -274,14 +274,6 @@ export default function Bookings() {
 
         <div>
 
-          {/* Small Heading */}
-
-          <p className="text-sm font-semibold text-blue-600">
-            Booking Management
-          </p>
-
-          {/* Main Heading */}
-
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
             Bookings
           </h1>
@@ -889,8 +881,8 @@ export default function Bookings() {
                         )
                       }
                       className={`h-9 min-w-9 rounded-lg px-3 text-sm font-medium transition ${bookingPage === page
-                          ? "bg-blue-600 text-white"
-                          : "text-slate-600 hover:bg-slate-100"
+                        ? "bg-blue-600 text-white"
+                        : "text-slate-600 hover:bg-slate-100"
                         }`}
                     >
                       {page}

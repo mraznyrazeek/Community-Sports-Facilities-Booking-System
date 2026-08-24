@@ -8,7 +8,6 @@ import {
   X,
   Save,
   Loader2,
-  MoreVertical,
   Dumbbell,
   Users,
   Building2,
@@ -21,10 +20,12 @@ import {
   deleteSport,
 } from "../services/api";
 
+import { useToast } from "../components/context/ToastContext";
+
 type Sport = {
   sportId: number;
   sportName: string;
-  description?: string;
+  description?: string | null;
 };
 
 type SportForm = {
@@ -33,6 +34,8 @@ type SportForm = {
 };
 
 export default function Sports() {
+  const { showToast } = useToast();
+
   const [sports, setSports] = useState<Sport[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -58,7 +61,16 @@ export default function Sports() {
 
       setSports(data || []);
     } catch (err: any) {
-      setError(err?.message || "Unable to load sports.");
+      const message =
+        err?.message || "Unable to load sports.";
+
+      setError(message);
+
+      showToast({
+        type: "error",
+        title: "Failed to Load Sports",
+        message,
+      });
     } finally {
       setLoading(false);
     }
@@ -77,17 +89,23 @@ export default function Sports() {
 
     return sports.filter(
       (sport) =>
-        sport.sportName?.toLowerCase().includes(query) ||
-        sport.description?.toLowerCase().includes(query)
+        sport.sportName
+          ?.toLowerCase()
+          .includes(query) ||
+        sport.description
+          ?.toLowerCase()
+          .includes(query)
     );
   }, [sports, search]);
 
   const openCreateForm = () => {
     setEditingId(null);
+
     setForm({
       sportName: "",
       description: "",
     });
+
     setError("");
     setShowForm(true);
   };
@@ -121,48 +139,83 @@ export default function Sports() {
   };
 
   const handleSubmit = async (
-  event: React.FormEvent<HTMLFormElement>
-) => {
-  event.preventDefault();
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
 
-  const name = form.sportName.trim();
-  const description = form.description.trim();
+    const name = form.sportName.trim();
+    const description = form.description.trim();
 
-  if (!name) {
-    setError("Sport name is required.");
-    return;
-  }
+    if (!name) {
+      setError("Sport name is required.");
 
-  try {
-    setSaving(true);
-    setError("");
-
-    if (editingId !== null) {
-      await updateSport(editingId, {
-        sportId: editingId,
-        sportName: name,
-        description,
+      showToast({
+        type: "error",
+        title: "Sport Name Required",
+        message: "Please enter a sport name.",
       });
-    } else {
-      await createSport({
-        sportName: name,
-        description,
-      });
+
+      return;
     }
 
-    closeForm();
-    await loadSports();
-  } catch (err: any) {
-    setError(
-      err?.message ||
-        (editingId !== null
+    const isEditing = editingId !== null;
+
+    try {
+      setSaving(true);
+      setError("");
+
+      if (isEditing) {
+        await updateSport(editingId, {
+          sportId: editingId,
+          sportName: name,
+          description,
+        });
+
+        showToast({
+          type: "success",
+          title: "Sport Updated",
+          message: `${name} has been updated successfully.`,
+        });
+      }
+
+      else {
+        await createSport({
+          sportName: name,
+          description,
+        });
+
+        showToast({
+          type: "success",
+          title: "Sport Added",
+          message: `${name} has been added successfully.`,
+        });
+      }
+
+      // Close modal
+      closeForm();
+
+      // Refresh sports
+      await loadSports();
+    } catch (err: any) {
+      const message =
+        err?.message ||
+        (isEditing
           ? "Unable to update sport."
-          : "Unable to create sport.")
-    );
-  } finally {
-    setSaving(false);
-  }
-};
+          : "Unable to create sport.");
+
+      setError(message);
+
+      showToast({
+        type: "error",
+        title: isEditing
+          ? "Failed to Update Sport"
+          : "Failed to Add Sport",
+        message,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleDelete = async (sport: Sport) => {
     const confirmed = window.confirm(
@@ -179,16 +232,32 @@ export default function Sports() {
 
       await deleteSport(sport.sportId);
 
+      // Remove immediately from UI
       setSports((current) =>
         current.filter(
           (item) => item.sportId !== sport.sportId
         )
       );
+
+      // Success toast
+      showToast({
+        type: "success",
+        title: "Sport Deleted",
+        message: `${sport.sportName} has been deleted successfully.`,
+      });
     } catch (err: any) {
-      setError(
+      const message =
         err?.message ||
-          "Unable to delete this sport. It may be used by facilities or members."
-      );
+        "Unable to delete this sport. It may be used by facilities or members.";
+
+      setError(message);
+
+      // Error toast
+      showToast({
+        type: "error",
+        title: "Failed to Delete Sport",
+        message,
+      });
     } finally {
       setDeletingId(null);
     }
@@ -215,20 +284,16 @@ export default function Sports() {
 
   return (
     <div className="space-y-7">
+
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <div className="mb-2 flex items-center gap-2 text-sm font-medium text-blue-600">
-            <Trophy size={16} />
-            Community Management
-          </div>
-
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             Sports
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-            Manage the sports available across your community
-            facilities.
+            Manage the sports available across your
+            community facilities.
           </p>
         </div>
 
@@ -257,6 +322,9 @@ export default function Sports() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+
+        {/* TOTAL SPORTS */}
+
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
@@ -279,6 +347,8 @@ export default function Sports() {
           </p>
         </div>
 
+        {/* COMMUNITY ACTIVITIES */}
+
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
@@ -300,6 +370,8 @@ export default function Sports() {
             Activities managed by administrators
           </p>
         </div>
+
+        {/* MANAGEMENT */}
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:col-span-2 xl:col-span-1">
           <div className="flex items-center justify-between">
@@ -325,6 +397,9 @@ export default function Sports() {
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+        {/* LIST HEADER */}
+
         <div className="flex flex-col gap-4 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-base font-bold text-slate-900">
@@ -339,6 +414,8 @@ export default function Sports() {
               shown
             </p>
           </div>
+
+          {/* SEARCH */}
 
           <div className="relative w-full sm:w-80">
             <Search
@@ -358,8 +435,11 @@ export default function Sports() {
           </div>
         </div>
 
+        {/* EMPTY STATE */}
+
         {filteredSports.length === 0 ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center px-6 py-12 text-center">
+
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
               {search ? (
                 <Search size={28} />
@@ -392,31 +472,49 @@ export default function Sports() {
             )}
           </div>
         ) : (
+
+          /* SPORTS GRID */
+
           <div className="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
+
             {filteredSports.map((sport) => (
               <div
                 key={sport.sportId}
                 className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg hover:shadow-slate-200/60"
               >
+
+                {/* CARD TOP */}
+
                 <div className="flex items-start justify-between">
+
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
                     <Trophy size={22} />
                   </div>
 
+                  {/* ACTIONS */}
+
                   <div className="flex items-center gap-1">
+
+                    {/* EDIT */}
+
                     <button
                       type="button"
-                      onClick={() => openEditForm(sport)}
+                      onClick={() =>
+                        openEditForm(sport)
+                      }
                       className="rounded-lg p-2 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
                       title="Edit sport"
                     >
                       <Pencil size={17} />
                     </button>
 
+                    {/* DELETE */}
+
                     <button
                       type="button"
                       disabled={
-                        deletingId === sport.sportId
+                        deletingId ===
+                        sport.sportId
                       }
                       onClick={() =>
                         handleDelete(sport)
@@ -434,25 +532,35 @@ export default function Sports() {
                         <Trash2 size={17} />
                       )}
                     </button>
+
                   </div>
                 </div>
 
+                {/* CARD CONTENT */}
+
                 <div className="mt-5">
+
                   <div className="flex items-center gap-2">
+
                     <h3 className="truncate text-lg font-bold text-slate-900">
                       {sport.sportName}
                     </h3>
 
                     <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+
                   </div>
 
                   <p className="mt-2 min-h-[48px] text-sm leading-6 text-slate-500">
                     {sport.description ||
                       "No description available for this sport."}
                   </p>
+
                 </div>
 
+                {/* CARD FOOTER */}
+
                 <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+
                   <span className="text-xs font-medium text-slate-400">
                     Sport ID
                   </span>
@@ -460,18 +568,27 @@ export default function Sports() {
                   <span className="rounded-lg bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600">
                     #{sport.sportId}
                   </span>
+
                 </div>
+
               </div>
             ))}
+
           </div>
         )}
       </div>
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
+
           <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+
+            {/* MODAL HEADER */}
+
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+
               <div>
+
                 <h2 className="text-lg font-bold text-slate-900">
                   {editingId !== null
                     ? "Edit Sport"
@@ -483,6 +600,7 @@ export default function Sports() {
                     ? "Update the sport information below."
                     : "Add a new sport to your community."}
                 </p>
+
               </div>
 
               <button
@@ -493,19 +611,28 @@ export default function Sports() {
               >
                 <X size={20} />
               </button>
+
             </div>
+
+            {/* FORM */}
 
             <form
               onSubmit={handleSubmit}
               className="space-y-5 p-6"
             >
+
+              {/* FORM ERROR */}
+
               {error && (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   {error}
                 </div>
               )}
 
+              {/* SPORT NAME */}
+
               <div>
+
                 <label className="mb-2 block text-sm font-semibold text-slate-700">
                   Sport Name
                 </label>
@@ -526,9 +653,13 @@ export default function Sports() {
                   autoFocus
                   className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-50"
                 />
+
               </div>
 
+              {/* DESCRIPTION */}
+
               <div>
+
                 <label className="mb-2 block text-sm font-semibold text-slate-700">
                   Description
                 </label>
@@ -549,13 +680,19 @@ export default function Sports() {
                 />
 
                 <div className="mt-1 flex justify-end">
+
                   <span className="text-xs text-slate-400">
                     {form.description.length}/500
                   </span>
+
                 </div>
+
               </div>
 
+              {/* BUTTONS */}
+
               <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+
                 <button
                   type="button"
                   onClick={closeForm}
@@ -570,24 +707,30 @@ export default function Sports() {
                   disabled={saving}
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
+
                   {saving ? (
                     <>
                       <Loader2
                         size={17}
                         className="animate-spin"
                       />
+
                       Saving...
                     </>
                   ) : (
                     <>
                       <Save size={17} />
+
                       {editingId !== null
                         ? "Save Changes"
                         : "Create Sport"}
                     </>
                   )}
+
                 </button>
+
               </div>
+
             </form>
           </div>
         </div>
