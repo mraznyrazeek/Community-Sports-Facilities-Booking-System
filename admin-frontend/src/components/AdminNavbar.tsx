@@ -1,97 +1,222 @@
-import {
-  Bell,
-  ChevronDown,
-  Search,
-  UserCircle,
-} from "lucide-react";
+import { Bell } from "lucide-react";
 import { useState } from "react";
-import { getAdminMember } from "../services/api";
 
 export default function AdminNavbar() {
-  const admin = getAdminMember();
-
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-
-  const adminName = admin?.name || "Administrator";
-
-  const firstLetter =
-    adminName.charAt(0).toUpperCase() || "A";
+  const [notificationsOpen, setNotificationsOpen] =
+    useState(false);
 
   return (
-    <header className="sticky top-0 z-30 flex h-[68px] items-center border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
-      <div className="ml-14 flex min-w-0 flex-1 items-center lg:ml-0">
-        <div className="relative w-full max-w-xl">
-          <Search
-            size={18}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-          />
+    <div className="fixed right-5 top-4 z-[100]">
 
-          <input
-            type="search"
-            placeholder="Search anything..."
-            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-          />
-        </div>
-      </div>
+      {/* Floating Notification Button */}
+      <button
+        type="button"
+        aria-label="Notifications"
+        onClick={() =>
+          setNotificationsOpen((value) => !value)
+        }
+        className="
+          relative
+          flex h-11 w-11
+          items-center justify-center
+          rounded-xl
+          border border-slate-200
+          bg-white
+          text-slate-500
+          shadow-sm
+          transition-all duration-200
+          hover:-translate-y-0.5
+          hover:border-slate-300
+          hover:bg-slate-50
+          hover:text-slate-900
+          hover:shadow-md
+        "
+      >
+        <Bell
+          size={20}
+          strokeWidth={1.8}
+        />
 
-      <div className="ml-4 flex items-center gap-2 sm:ml-6 sm:gap-4">
-        <div className="relative">
-          <button
-            type="button"
-            aria-label="Notifications"
-            onClick={() =>
-              setNotificationsOpen((value) => !value)
-            }
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+        {/* Red notification dot */}
+        <span
+          className="
+            absolute
+            right-1.5
+            top-1.5
+            h-2.5
+            w-2.5
+            rounded-full
+            bg-red-500
+            ring-2
+            ring-white
+          "
+        />
+      </button>
+
+
+      {/* Notification Dropdown */}
+      {notificationsOpen && (
+        <div
+          className="
+            absolute
+            right-0
+            top-14
+            w-[320px]
+            overflow-hidden
+            rounded-2xl
+            border
+            border-slate-200
+            bg-white
+            shadow-xl
+            shadow-slate-900/10
+          "
+        >
+
+          {/* Header */}
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              border-b
+              border-slate-100
+              px-4
+              py-4
+            "
           >
-            <Bell size={20} />
 
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-          </button>
+            <div>
+              <h3
+                className="
+                  text-sm
+                  font-semibold
+                  text-slate-900
+                "
+              >
+                Notifications
+              </h3>
 
-          {notificationsOpen && (
-            <div className="absolute right-0 top-12 w-80 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
-              <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-900">
-                    Notifications
-                  </h3>
-
-                  <p className="mt-0.5 text-xs text-slate-400">
-                    Recent system activity
-                  </p>
-                </div>
-
-                <span className="rounded-full bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600">
-                  New
-                </span>
-              </div>
-
-              <div className="px-4 py-5">
-                <p className="text-sm text-slate-500">
-                  You have notifications available in the
-                  administration system.
-                </p>
-              </div>
-
-              <div className="border-t border-slate-100 px-4 py-3">
-                <button
-                  type="button"
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-700"
-                  onClick={() =>
-                    setNotificationsOpen(false)
-                  }
-                >
-                  Close
-                </button>
-              </div>
+              <p
+                className="
+                  mt-0.5
+                  text-xs
+                  text-slate-400
+                "
+              >
+                Recent system activity
+              </p>
             </div>
-          )}
-        </div>
 
-        
-      </div>
-    </header>
+            <span
+              className="
+                rounded-full
+                bg-red-50
+                px-2
+                py-1
+                text-[10px]
+                font-semibold
+                uppercase
+                tracking-wide
+                text-red-600
+              "
+            >
+              New
+            </span>
+
+          </div>
+
+
+          {/* Notification */}
+          <div
+            className="
+              border-b
+              border-slate-100
+              px-4
+              py-4
+            "
+          >
+
+            <div className="flex gap-3">
+
+              <div
+                className="
+                  flex
+                  h-9
+                  w-9
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-lg
+                  bg-blue-50
+                  text-blue-600
+                "
+              >
+                <Bell size={17} />
+              </div>
+
+              <div>
+
+                <p
+                  className="
+                    text-sm
+                    font-medium
+                    text-slate-900
+                  "
+                >
+                  System notifications
+                </p>
+
+                <p
+                  className="
+                    mt-1
+                    text-xs
+                    leading-5
+                    text-slate-500
+                  "
+                >
+                  New booking, member and system
+                  activity will appear here.
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {/* Footer */}
+          <div
+            className="
+              flex
+              justify-end
+              bg-slate-50/70
+              px-4
+              py-3
+            "
+          >
+
+            <button
+              type="button"
+              onClick={() =>
+                setNotificationsOpen(false)
+              }
+              className="
+                text-xs
+                font-semibold
+                text-blue-600
+                transition
+                hover:text-blue-700
+              "
+            >
+              Close
+            </button>
+
+          </div>
+
+        </div>
+      )}
+
+    </div>
   );
 }
