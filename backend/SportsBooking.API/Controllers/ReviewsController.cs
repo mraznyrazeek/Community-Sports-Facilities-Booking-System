@@ -113,7 +113,6 @@ namespace SportsBooking.API.Controllers
                 FacilityId = request.FacilityId,
                 Rating = request.Rating,
                 CommentText = request.CommentText?.Trim(),
-                CreatedAt = DateTime.Now
             };
 
             _context.Reviews.Add(review);

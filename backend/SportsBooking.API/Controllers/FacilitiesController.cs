@@ -123,12 +123,6 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
-            var maxId = await _context.Facilities
-                .Select(f => (decimal?)f.FacilityId)
-                .MaxAsync() ?? 0;
-
-            facility.FacilityId = maxId + 1;
-
             if (string.IsNullOrWhiteSpace(facility.Status))
             {
                 facility.Status = "Active";

@@ -47,13 +47,8 @@ namespace SportsBooking.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Sport>> PostSport(Sport sport)
         {
-            var maxId = await _context.Sports
-                .Select(s => (decimal?)s.SportId)
-                .MaxAsync() ?? 0;
-
-            sport.SportId = maxId + 1;
-
             _context.Sports.Add(sport);
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(

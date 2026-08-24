@@ -104,13 +104,6 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
-            var maxId = await _context.Members
-                .Select(m => (decimal?)m.MemberId)
-                .MaxAsync() ?? 0;
-
-            member.MemberId = maxId + 1;
-            member.CreatedAt = DateTime.Now;
-
             member.Name = member.Name.Trim();
             member.Email = email;
 

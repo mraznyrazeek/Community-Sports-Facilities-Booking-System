@@ -78,7 +78,6 @@ namespace SportsBooking.API.Controllers
 
             var member = new Member
             {
-                MemberId = nextMemberId,
                 Name = request.Name.Trim(),
                 Email = email,
                 Phone = request.Phone,

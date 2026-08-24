@@ -235,8 +235,7 @@ namespace SportsBooking.API.Controllers
                 BookingDate = request.BookingDate,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
-                Status = "Pending",
-                CreatedAt = DateTime.Now
+                Status = "Pending"
             };
 
             _context.Bookings.Add(booking);

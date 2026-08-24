@@ -89,7 +89,7 @@ namespace SportsBooking.API.Controllers
         // Logged-in members can create inquiries.
         [HttpPost]
         public async Task<ActionResult<object>> CreateInquiry(
-            CreateInquiryRequest request)
+        CreateInquiryRequest request)
         {
             var memberId = GetCurrentMemberId();
 
@@ -99,7 +99,6 @@ namespace SportsBooking.API.Controllers
                     "Member identity could not be determined.");
             }
 
-            // Check member exists
             var member = await _context.Members
                 .FirstOrDefaultAsync(m => m.MemberId == memberId.Value);
 
@@ -108,21 +107,14 @@ namespace SportsBooking.API.Controllers
                 return BadRequest("Member does not exist.");
             }
 
-            // Generate next Inquiry ID
-            var lastInquiryId = await _context.Inquiries
-                .Select(i => (decimal?)i.InquiryId)
-                .MaxAsync() ?? 0;
-
             var inquiry = new Inquiry
             {
-                InquiryId = lastInquiryId + 1,
                 MemberId = memberId.Value,
                 Name = member.Name,
                 Email = member.Email,
                 Subject = request.Subject,
                 Message = request.Message,
-                Status = "Pending",
-                CreatedAt = DateTime.Now
+                Status = "Pending"
             };
 
             _context.Inquiries.Add(inquiry);
