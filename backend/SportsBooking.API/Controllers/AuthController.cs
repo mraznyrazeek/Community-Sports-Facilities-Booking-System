@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SportsBooking.API.Models;
 using SportsBooking.API.Models.Auth;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 namespace SportsBooking.API.Controllers
@@ -203,7 +204,6 @@ namespace SportsBooking.API.Controllers
             return Ok(new
             {
                 message = "Login successful.",
-
                 token = tokenString,
 
                 member = new
@@ -215,6 +215,228 @@ namespace SportsBooking.API.Controllers
                     status = member.Status,
                     role = userRole
                 }
+            });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("change-password")]
+        public async Task<ActionResult<object>> ChangePassword(
+            ChangePasswordRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.CurrentPassword))
+            {
+                return BadRequest(new
+                {
+                    message = "Current password is required."
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                return BadRequest(new
+                {
+                    message = "New password is required."
+                });
+            }
+
+            if (request.NewPassword.Length < 8)
+            {
+                return BadRequest(new
+                {
+                    message = "New password must be at least 8 characters long."
+                });
+            }
+
+            var memberIdClaim = User.FindFirst(
+                ClaimTypes.NameIdentifier);
+
+            if (memberIdClaim == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Unable to identify the logged-in administrator."
+                });
+            }
+
+            if (!decimal.TryParse(
+                    memberIdClaim.Value,
+                    out var memberId))
+            {
+                return Unauthorized(new
+                {
+                    message = "Invalid administrator identity."
+                });
+            }
+
+            var member = await _context.Members
+                .FirstOrDefaultAsync(m =>
+                    m.MemberId == memberId);
+
+            if (member == null)
+            {
+                return NotFound(new
+                {
+                    message = "Administrator account not found."
+                });
+            }
+
+            if (!member.UserRole.Equals(
+                    "Admin",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return Forbid();
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(
+                    request.CurrentPassword,
+                    member.Password))
+            {
+                return BadRequest(new
+                {
+                    message = "Current password is incorrect."
+                });
+            }
+
+            if (BCrypt.Net.BCrypt.Verify(
+                    request.NewPassword,
+                    member.Password))
+            {
+                return BadRequest(new
+                {
+                    message = "New password must be different from your current password."
+                });
+            }
+
+            member.Password =
+                BCrypt.Net.BCrypt.HashPassword(
+                    request.NewPassword);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Password changed successfully."
+            });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admins")]
+        public async Task<ActionResult<object>> GetAdmins()
+        {
+            var admins = await _context.Members
+                .Where(m =>
+                    m.UserRole.ToLower() == "admin" &&
+                    m.Status.ToLower() == "active")
+                .OrderBy(m => m.Name)
+                .Select(m => new
+                {
+                    memberId = m.MemberId,
+                    name = m.Name,
+                    email = m.Email,
+                    phone = m.Phone,
+                    status = m.Status,
+                    role = m.UserRole,
+                    createdAt = m.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(admins);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("admins/{id}")]
+        public async Task<ActionResult<object>> DeleteAdmin(
+            decimal id)
+        {
+            var currentAdminClaim = User.FindFirst(
+                ClaimTypes.NameIdentifier);
+
+            if (currentAdminClaim == null ||
+                !decimal.TryParse(
+                    currentAdminClaim.Value,
+                    out var currentAdminId))
+            {
+                return Unauthorized(new
+                {
+                    message = "Unable to identify the logged-in administrator."
+                });
+            }
+
+            if (currentAdminId == id)
+            {
+                return BadRequest(new
+                {
+                    message = "You cannot delete your own administrator account."
+                });
+            }
+
+            var admin = await _context.Members
+                .FirstOrDefaultAsync(m =>
+                    m.MemberId == id &&
+                    m.UserRole.ToLower() == "admin");
+
+            if (admin == null)
+            {
+                return NotFound(new
+                {
+                    message = "Administrator account not found."
+                });
+            }
+
+            admin.Status = "Inactive";
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Administrator account removed successfully."
+            });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("admins/{id}/password")]
+        public async Task<ActionResult<object>> ResetAdminPassword(
+            decimal id,
+            ResetAdminPasswordRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                return BadRequest(new
+                {
+                    message = "New password is required."
+                });
+            }
+
+            if (request.NewPassword.Length < 8)
+            {
+                return BadRequest(new
+                {
+                    message = "New password must be at least 8 characters long."
+                });
+            }
+
+            var admin = await _context.Members
+                .FirstOrDefaultAsync(m =>
+                    m.MemberId == id &&
+                    m.UserRole.ToLower() == "admin");
+
+            if (admin == null)
+            {
+                return NotFound(new
+                {
+                    message = "Administrator account not found."
+                });
+            }
+
+            admin.Password =
+                BCrypt.Net.BCrypt.HashPassword(
+                    request.NewPassword);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Administrator password updated successfully."
             });
         }
     }

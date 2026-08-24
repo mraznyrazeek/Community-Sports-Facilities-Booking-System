@@ -14,6 +14,7 @@ import Bookings from "./pages/Bookings";
 import Members from "./pages/Members";
 import Reviews from "./pages/Reviews";
 import Inquiries from "./pages/Inquiries";
+import Settings from "./pages/Settings";
 
 import { isAuthenticated } from "./services/api";
 
@@ -82,7 +83,15 @@ export default function App() {
           path="/inquiries"
           element={<Inquiries />}
         />
+
+         <Route
+        path="/settings"
+        element={<Settings />}
+      />
+      
       </Route>
+
+     
 
       {/* Unknown routes */}
       <Route

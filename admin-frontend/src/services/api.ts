@@ -7,6 +7,7 @@ export type Member = {
   phone?: string | null;
   status: string;
   role?: string | null;
+  userRole?: string | null;
   createdAt: string;
 };
 
@@ -109,13 +110,10 @@ async function request<T>(
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(
-    `${API_BASE_URL}${endpoint}`,
-    {
-      ...options,
-      headers,
-    }
-  );
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
 
   if (response.status === 401) {
     localStorage.removeItem("adminToken");
@@ -177,10 +175,7 @@ export async function login(
     }
   );
 
-  localStorage.setItem(
-    "adminToken",
-    data.token
-  );
+  localStorage.setItem("adminToken", data.token);
 
   localStorage.setItem(
     "adminMember",
@@ -203,9 +198,7 @@ export function isAuthenticated() {
   );
 }
 
-export function getAdminMember():
-  | Member
-  | null {
+export function getAdminMember(): Member | null {
   const value =
     localStorage.getItem("adminMember");
 
@@ -220,7 +213,69 @@ export function getAdminMember():
   }
 }
 
-/* Members */
+
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string
+) 
+
+{
+  return request<{ message: string }>(
+    "/Auth/change-password",
+    {
+      method: "PUT",
+      body: JSON.stringify({
+        currentPassword,
+        newPassword,
+      }),
+    }
+  );
+}
+
+export async function getAdminMembers(): Promise<Member[]> {
+  return request<Member[]>("/Auth/admins");
+}
+
+export async function resetAdminPassword(
+  memberId: number,
+  newPassword: string
+) {
+  return request<{ message: string }>(
+    `/Auth/admins/${memberId}/password`,
+    {
+      method: "PUT",
+      body: JSON.stringify({
+        newPassword,
+      }),
+    }
+  );
+}
+
+export async function deleteAdmin(
+  memberId: number
+) {
+  return request<{ message: string }>(
+    `/Auth/admins/${memberId}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+
+export async function changeAdminPassword(
+  memberId: number,
+  newPassword: string
+) {
+  return request<{ message: string }>(
+    `/Auth/admin/${memberId}/change-password`,
+    {
+      method: "PUT",
+      body: JSON.stringify({
+        newPassword,
+      }),
+    }
+  );
+}
 
 export async function getMembers() {
   return request<Member[]>("/Members");
@@ -246,7 +301,6 @@ export async function deleteMember(id: number) {
   });
 }
 
-/* Sports */
 
 export async function getSports() {
   return request<Sport[]>("/Sports");
@@ -282,7 +336,6 @@ export async function deleteSport(id: number) {
   });
 }
 
-/* Facilities */
 
 export async function getFacilities() {
   return request<Facility[]>("/Facilities");
@@ -324,7 +377,6 @@ export async function deleteFacility(id: number) {
   });
 }
 
-/* Bookings */
 
 export async function getBookings() {
   return request<Booking[]>("/Bookings");
@@ -360,7 +412,6 @@ export async function deleteBooking(id: number) {
   });
 }
 
-/* Reviews */
 
 export async function getReviews() {
   return request<Review[]>("/Reviews");
@@ -388,8 +439,6 @@ export async function deleteReview(id: number) {
     method: "DELETE",
   });
 }
-
-/* Inquiries */
 
 export async function getInquiries() {
   return request<Inquiry[]>("/Inquiries");

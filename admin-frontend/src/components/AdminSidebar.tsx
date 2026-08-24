@@ -189,7 +189,7 @@ export default function AdminSidebar({
           )}
         </NavLink>
 
-        <button
+        {/* <button
           type="button"
           onClick={() => {
             window.location.href =
@@ -203,7 +203,7 @@ export default function AdminSidebar({
           />
 
           <span>Help & Support</span>
-        </button>
+        </button> */}
       </nav>
 
       <div className="shrink-0 border-t border-slate-200 p-4">

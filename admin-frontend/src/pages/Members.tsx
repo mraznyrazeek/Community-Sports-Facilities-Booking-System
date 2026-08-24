@@ -68,10 +68,6 @@ export default function Members() {
   const [saving, setSaving] =
     useState(false);
 
-  /* =========================================================
-     LOAD MEMBERS
-     ========================================================= */
-
   const loadMembers = async () => {
     try {
       setLoading(true);
@@ -93,10 +89,6 @@ export default function Members() {
   useEffect(() => {
     loadMembers();
   }, []);
-
-  /* =========================================================
-     STATISTICS
-     ========================================================= */
 
   const totalMembers =
     members.length;
@@ -124,10 +116,6 @@ export default function Members() {
           ?.toLowerCase() ===
         "admin"
     ).length;
-
-  /* =========================================================
-     FILTER MEMBERS
-     ========================================================= */
 
   const filteredMembers =
     useMemo(() => {
@@ -189,10 +177,6 @@ export default function Members() {
       roleFilter,
     ]);
 
-  /* =========================================================
-     OPEN EDIT MODAL
-     ========================================================= */
-
   const openEditModal = (
     member: Member
   ) => {
@@ -221,10 +205,6 @@ export default function Members() {
     setShowEditModal(true);
   };
 
-  /* =========================================================
-     CLOSE EDIT MODAL
-     ========================================================= */
-
   const closeEditModal = () => {
     if (saving) {
       return;
@@ -240,10 +220,6 @@ export default function Members() {
     setRole("Member");
     setStatus("Active");
   };
-
-  /* =========================================================
-     UPDATE MEMBER
-     ========================================================= */
 
   const handleUpdate = async (
   event: React.FormEvent
@@ -269,9 +245,6 @@ export default function Members() {
       }
     );
 
-    // IMPORTANT:
-    // Reload the data from the backend after updating.
-    // This confirms that the database was actually updated.
     await loadMembers();
 
     closeEditModal();
@@ -287,10 +260,6 @@ export default function Members() {
     setSaving(false);
   }
 };
-
-  /* =========================================================
-     DELETE MEMBER
-     ========================================================= */
 
   const removeMember = async (
     id: number
@@ -338,10 +307,6 @@ export default function Members() {
     }
   };
 
-  /* =========================================================
-     LOADING
-     ========================================================= */
-
   if (loading) {
     return (
       <LoadingSpinner
@@ -350,16 +315,8 @@ export default function Members() {
     );
   }
 
-  /* =========================================================
-     PAGE
-     ========================================================= */
-
   return (
     <div className="space-y-7">
-
-      {/* =====================================================
-          PAGE HEADER
-          ===================================================== */}
 
       <div>
         <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
@@ -378,10 +335,6 @@ export default function Members() {
           status.
         </p>
       </div>
-
-      {/* =====================================================
-          STATISTICS
-          ===================================================== */}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
@@ -491,10 +444,6 @@ export default function Members() {
 
       </div>
 
-      {/* =====================================================
-          SEARCH + FILTERS
-          ===================================================== */}
-
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
 
         <div className="flex flex-col gap-3 lg:flex-row">
@@ -573,10 +522,6 @@ export default function Members() {
         </div>
 
       </div>
-
-      {/* =====================================================
-          MEMBERS TABLE
-          ===================================================== */}
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
@@ -896,10 +841,6 @@ export default function Members() {
         </div>
 
       </div>
-
-      {/* =====================================================
-          EDIT MODAL
-          ===================================================== */}
 
       {showEditModal &&
         editingMember && (

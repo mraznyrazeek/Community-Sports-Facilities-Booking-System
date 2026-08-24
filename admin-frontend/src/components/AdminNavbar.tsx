@@ -90,75 +90,7 @@ export default function AdminNavbar() {
           )}
         </div>
 
-        <div className="hidden h-8 w-px bg-slate-200 sm:block" />
-
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() =>
-              setProfileOpen((value) => !value)
-            }
-            className="flex items-center gap-2 rounded-xl p-1.5 transition hover:bg-slate-50 sm:gap-3"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-              <span className="text-sm font-bold">
-                {firstLetter}
-              </span>
-            </div>
-
-            <div className="hidden text-left md:block">
-              <p className="max-w-32 truncate text-sm font-semibold text-slate-900">
-                {adminName}
-              </p>
-
-              <p className="text-xs text-slate-400">
-                Administrator
-              </p>
-            </div>
-
-            <ChevronDown
-              size={16}
-              className={`hidden text-slate-400 transition md:block ${
-                profileOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {profileOpen && (
-            <div className="absolute right-0 top-12 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
-              <div className="border-b border-slate-100 px-4 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 font-bold text-blue-600">
-                    {firstLetter}
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-900">
-                      {adminName}
-                    </p>
-
-                    <p className="text-xs text-slate-400">
-                      Administrator
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setProfileOpen(false)
-                  }
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
-                >
-                  <UserCircle size={18} />
-                  Account Profile
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        
       </div>
     </header>
   );
