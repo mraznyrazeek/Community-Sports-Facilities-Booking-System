@@ -43,6 +43,10 @@ export default function MemberSports() {
   const [memberSearch, setMemberSearch] =
     useState("");
 
+  const MEMBERS_PER_PAGE = 10;
+
+  const [memberPage, setMemberPage] = useState(1);
+
   const [deletingSportId, setDeletingSportId] =
     useState<number | null>(null);
 
@@ -57,6 +61,7 @@ export default function MemberSports() {
       const data = await getMembers();
 
       setMembers(data || []);
+      setMemberPage(1);
     } catch (error) {
       console.error(
         "Failed to load members:",
@@ -157,10 +162,6 @@ export default function MemberSports() {
     }
   };
 
-  // --------------------------------------------------
-  // Filter members
-  // --------------------------------------------------
-
   const filteredMembers = useMemo(() => {
     const value = memberSearch
       .trim()
@@ -182,9 +183,24 @@ export default function MemberSports() {
     );
   }, [members, memberSearch]);
 
-  // --------------------------------------------------
-  // Filter sports
-  // --------------------------------------------------
+  const totalMemberPages = Math.ceil(
+    filteredMembers.length /
+    MEMBERS_PER_PAGE
+  );
+
+  const paginatedMembers = useMemo(() => {
+    const startIndex =
+      (memberPage - 1) *
+      MEMBERS_PER_PAGE;
+
+    return filteredMembers.slice(
+      startIndex,
+      startIndex + MEMBERS_PER_PAGE
+    );
+  }, [
+    filteredMembers,
+    memberPage,
+  ]);
 
   const filteredSports = useMemo(() => {
     const value = search
@@ -206,9 +222,6 @@ export default function MemberSports() {
     );
   }, [memberSports, search]);
 
-  // --------------------------------------------------
-  // Initial loading
-  // --------------------------------------------------
 
   if (loading) {
     return (
@@ -218,16 +231,8 @@ export default function MemberSports() {
     );
   }
 
-  // --------------------------------------------------
-  // Page
-  // --------------------------------------------------
-
   return (
     <div className="space-y-7">
-
-      {/* ============================================
-          PAGE HEADER
-      ============================================ */}
 
       <div>
         <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
@@ -246,16 +251,11 @@ export default function MemberSports() {
         </p>
       </div>
 
-      {/* ============================================
-          MEMBER SELECTION
-      ============================================ */}
-
       {!selectedMember && (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
-          {/* Card Header */}
-
           <div className="border-b border-slate-100 px-6 py-5">
+
             <h2 className="font-semibold text-slate-900">
               Select a Member
             </h2>
@@ -264,11 +264,11 @@ export default function MemberSports() {
               Choose a member to view
               their registered sports.
             </p>
+
           </div>
 
-          {/* Search Members */}
-
           <div className="border-b border-slate-100 p-4">
+
             <div className="relative">
 
               <Search
@@ -279,23 +279,28 @@ export default function MemberSports() {
               <input
                 type="search"
                 value={memberSearch}
-                onChange={(event) =>
+                onChange={(event) => {
                   setMemberSearch(
                     event.target.value
-                  )
-                }
+                  );
+
+                  // Always return to page 1
+                  // when searching.
+                  setMemberPage(1);
+                }}
                 placeholder="Search members..."
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
               />
 
             </div>
-          </div>
 
-          {/* Members */}
+          </div>
 
           <div className="divide-y divide-slate-100">
 
             {filteredMembers.length === 0 ? (
+
+              /* No members */
 
               <div className="px-6 py-14 text-center">
 
@@ -315,7 +320,9 @@ export default function MemberSports() {
 
             ) : (
 
-              filteredMembers.map(
+              /* Paginated members */
+
+              paginatedMembers.map(
                 (member) => (
 
                   <button
@@ -329,6 +336,8 @@ export default function MemberSports() {
                     className="flex w-full items-center justify-between px-6 py-5 text-left transition hover:bg-slate-50"
                   >
 
+                    {/* Member information */}
+
                     <div className="flex items-center gap-3">
 
                       {/* Avatar */}
@@ -340,7 +349,7 @@ export default function MemberSports() {
                           "M"}
                       </div>
 
-                      {/* Member Details */}
+                      {/* Details */}
 
                       <div>
 
@@ -359,6 +368,8 @@ export default function MemberSports() {
 
                     </div>
 
+                    {/* Arrow */}
+
                     <div className="text-xl text-slate-400">
                       →
                     </div>
@@ -371,18 +382,135 @@ export default function MemberSports() {
             )}
 
           </div>
+
+          {filteredMembers.length >
+            MEMBERS_PER_PAGE && (
+
+              <div className="flex flex-col gap-3 border-t border-slate-100 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+                {/* Showing count */}
+
+                <p className="text-sm text-slate-500">
+
+                  Showing{" "}
+
+                  <span className="font-medium text-slate-700">
+                    {(memberPage - 1) *
+                      MEMBERS_PER_PAGE +
+                      1}
+                  </span>
+
+                  {" – "}
+
+                  <span className="font-medium text-slate-700">
+                    {Math.min(
+                      memberPage *
+                      MEMBERS_PER_PAGE,
+                      filteredMembers.length
+                    )}
+                  </span>
+
+                  {" of "}
+
+                  <span className="font-medium text-slate-700">
+                    {filteredMembers.length}
+                  </span>
+
+                  {" "}members
+
+                </p>
+
+                {/* Pagination controls */}
+
+                <div className="flex items-center gap-2">
+
+                  {/* Previous */}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setMemberPage(
+                        (page) =>
+                          Math.max(
+                            page - 1,
+                            1
+                          )
+                      )
+                    }
+                    disabled={
+                      memberPage === 1
+                    }
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Previous
+                  </button>
+
+                  {/* Page numbers */}
+
+                  <div className="flex items-center gap-1">
+
+                    {Array.from(
+                      {
+                        length:
+                          totalMemberPages,
+                      },
+                      (_, index) =>
+                        index + 1
+                    ).map((page) => (
+
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() =>
+                          setMemberPage(
+                            page
+                          )
+                        }
+                        className={`h-9 min-w-9 rounded-lg px-3 text-sm font-medium transition ${memberPage === page
+                            ? "bg-blue-600 text-white"
+                            : "text-slate-600 hover:bg-slate-100"
+                          }`}
+                      >
+                        {page}
+                      </button>
+
+                    ))}
+
+                  </div>
+
+                  {/* Next */}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setMemberPage(
+                        (page) =>
+                          Math.min(
+                            page + 1,
+                            totalMemberPages
+                          )
+                      )
+                    }
+                    disabled={
+                      memberPage ===
+                      totalMemberPages
+                    }
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Next
+                  </button>
+
+                </div>
+
+              </div>
+
+            )}
+
         </div>
       )}
 
-      {/* ============================================
-          SELECTED MEMBER
-      ============================================ */}
-
       {selectedMember && (
         <>
-          {/* ========================================
-              MEMBER HEADER
-          ======================================== */}
 
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
@@ -399,7 +527,7 @@ export default function MemberSports() {
                     "M"}
                 </div>
 
-                {/* Member Information */}
+                {/* Member information */}
 
                 <div>
 
@@ -428,7 +556,7 @@ export default function MemberSports() {
 
               </div>
 
-              {/* Back Button */}
+              {/* Back button */}
 
               <button
                 type="button"
@@ -443,11 +571,8 @@ export default function MemberSports() {
               </button>
 
             </div>
-          </div>
 
-          {/* ========================================
-              STATISTICS
-          ======================================== */}
+          </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
 
@@ -479,6 +604,7 @@ export default function MemberSports() {
                 </div>
 
               </div>
+
             </div>
 
             {/* Member Status */}
@@ -508,13 +634,10 @@ export default function MemberSports() {
                 </div>
 
               </div>
+
             </div>
 
           </div>
-
-          {/* ========================================
-              REGISTERED SPORTS
-          ======================================== */}
 
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
@@ -574,9 +697,7 @@ export default function MemberSports() {
 
             ) : filteredSports.length === 0 ? (
 
-              /* ==================================
-                 NO SPORTS
-              ================================== */
+              /* No sports */
 
               <div className="px-6 py-16 text-center">
 
@@ -597,9 +718,7 @@ export default function MemberSports() {
 
             ) : (
 
-              /* ==================================
-                 SPORTS LIST
-              ================================== */
+              /* Sports list */
 
               <div className="divide-y divide-slate-100">
 
@@ -700,8 +819,10 @@ export default function MemberSports() {
             )}
 
           </div>
+
         </>
       )}
+
     </div>
   );
 }

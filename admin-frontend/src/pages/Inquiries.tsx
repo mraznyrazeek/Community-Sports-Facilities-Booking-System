@@ -21,6 +21,8 @@ import {
   type InquiryResponse,
 } from "../services/api";
 
+const ITEMS_PER_PAGE = 10;
+
 export default function Inquiries() {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +30,9 @@ export default function Inquiries() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [selectedInquiry, setSelectedInquiry] =
     useState<Inquiry | null>(null);
@@ -45,6 +50,7 @@ export default function Inquiries() {
     useState(false);
 
   const [saving, setSaving] = useState(false);
+
   const [deleting, setDeleting] =
     useState<number | null>(null);
 
@@ -79,6 +85,14 @@ export default function Inquiries() {
   useEffect(() => {
     loadInquiries();
   }, []);
+
+  // ------------------------------------------
+  // Reset pagination when search/filter changes
+  // ------------------------------------------
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
 
   // ------------------------------------------
   // Load responses for selected inquiry
@@ -167,7 +181,7 @@ export default function Inquiries() {
       const matchesStatus =
         statusFilter === "All" ||
         inquiry.status.toLowerCase() ===
-          statusFilter.toLowerCase();
+        statusFilter.toLowerCase();
 
       return (
         matchesSearch && matchesStatus
@@ -178,6 +192,45 @@ export default function Inquiries() {
     search,
     statusFilter,
   ]);
+
+  // ------------------------------------------
+  // Pagination calculations
+  // ------------------------------------------
+
+  const totalPages = Math.ceil(
+    filteredInquiries.length /
+    ITEMS_PER_PAGE
+  );
+
+  const paginatedInquiries = useMemo(() => {
+    const startIndex =
+      (currentPage - 1) *
+      ITEMS_PER_PAGE;
+
+    const endIndex =
+      startIndex + ITEMS_PER_PAGE;
+
+    return filteredInquiries.slice(
+      startIndex,
+      endIndex
+    );
+  }, [
+    filteredInquiries,
+    currentPage,
+  ]);
+
+  // ------------------------------------------
+  // Make sure current page is valid
+  // ------------------------------------------
+
+  useEffect(() => {
+    if (
+      totalPages > 0 &&
+      currentPage > totalPages
+    ) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   // ------------------------------------------
   // Update status
@@ -210,7 +263,7 @@ export default function Inquiries() {
       setInquiries((current) =>
         current.map((item) =>
           item.inquiryId ===
-          inquiry.inquiryId
+            inquiry.inquiryId
             ? updatedInquiry
             : item
         )
@@ -292,7 +345,7 @@ export default function Inquiries() {
         setInquiries((current) =>
           current.map((item) =>
             item.inquiryId ===
-            selectedInquiry.inquiryId
+              selectedInquiry.inquiryId
               ? updatedInquiry
               : item
           )
@@ -400,27 +453,52 @@ export default function Inquiries() {
     );
   }
 
+  // ------------------------------------------
+  // Pagination display numbers
+  // ------------------------------------------
+
+  const pageNumbers = [];
+
+  for (
+    let page = 1;
+    page <= totalPages;
+    page++
+  ) {
+    pageNumbers.push(page);
+  }
+
+  // ------------------------------------------
+  // Display range
+  // ------------------------------------------
+
+  const startItem =
+    filteredInquiries.length === 0
+      ? 0
+      : (currentPage - 1) *
+      ITEMS_PER_PAGE +
+      1;
+
+  const endItem = Math.min(
+    currentPage * ITEMS_PER_PAGE,
+    filteredInquiries.length
+  );
+
   return (
-    <div className="p-8">
+    <div>
 
-      {/* ------------------------------------ */}
-      {/* Header */}
-      {/* ------------------------------------ */}
+      <div>
+        <p className="text-sm font-medium text-blue-600">
+          Queries & Messages
+        </p>
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">
+        <h1 className="mt-1 text-3xl font-bold text-slate-900">
           Inquiries
         </h1>
 
         <p className="mt-2 text-base text-slate-500">
-          Manage messages and inquiries from
-          the public.
+          Manage messages and inquiries from the public.
         </p>
       </div>
-
-      {/* ------------------------------------ */}
-      {/* Error */}
-      {/* ------------------------------------ */}
 
       {error && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
@@ -428,11 +506,7 @@ export default function Inquiries() {
         </div>
       )}
 
-      {/* ------------------------------------ */}
-      {/* Statistics */}
-      {/* ------------------------------------ */}
-
-      <div className="mb-7 grid grid-cols-1 gap-5 md:grid-cols-3">
+      <div className="mt-8 mb-7 grid grid-cols-1 gap-5 md:grid-cols-3">
 
         {/* Total */}
 
@@ -516,10 +590,6 @@ export default function Inquiries() {
         </div>
       </div>
 
-      {/* ------------------------------------ */}
-      {/* Main Card */}
-      {/* ------------------------------------ */}
-
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
         {/* Top bar */}
@@ -588,10 +658,6 @@ export default function Inquiries() {
           </div>
         </div>
 
-        {/* -------------------------------- */}
-        {/* Empty state */}
-        {/* -------------------------------- */}
-
         {filteredInquiries.length === 0 ? (
           <div className="px-6 py-20 text-center">
 
@@ -608,7 +674,7 @@ export default function Inquiries() {
 
             <p className="mt-2 text-sm text-slate-500">
               {search ||
-              statusFilter !== "All"
+                statusFilter !== "All"
                 ? "Try changing your search or filter."
                 : "There are currently no inquiries."}
             </p>
@@ -616,7 +682,7 @@ export default function Inquiries() {
         ) : (
           <div className="divide-y divide-slate-100">
 
-            {filteredInquiries.map(
+            {paginatedInquiries.map(
               (inquiry) => (
                 <div
                   key={inquiry.inquiryId}
@@ -699,7 +765,7 @@ export default function Inquiries() {
                         <Trash2 size={17} />
 
                         {deleting ===
-                        inquiry.inquiryId
+                          inquiry.inquiryId
                           ? "Deleting..."
                           : "Delete"}
                       </button>
@@ -711,37 +777,98 @@ export default function Inquiries() {
           </div>
         )}
 
-        {/* Footer */}
-
         {filteredInquiries.length > 0 && (
-          <div className="border-t border-slate-200 bg-slate-50 px-5 py-4">
+          <div className="flex flex-col gap-4 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+            {/* Result count */}
+
             <p className="text-sm text-slate-500">
               Showing{" "}
               <span className="font-medium text-slate-700">
-                {filteredInquiries.length}
+                {startItem}
+              </span>
+              –
+              <span className="font-medium text-slate-700">
+                {endItem}
               </span>{" "}
               of{" "}
               <span className="font-medium text-slate-700">
-                {inquiries.length}
+                {filteredInquiries.length}
               </span>{" "}
               inquiries
             </p>
+
+            {/* Pagination */}
+
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1">
+
+                {/* Previous */}
+
+                <button
+                  type="button"
+                  disabled={currentPage === 1}
+                  onClick={() =>
+                    setCurrentPage(
+                      (page) =>
+                        page - 1
+                    )
+                  }
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Previous
+                </button>
+
+                {/* Page numbers */}
+
+                {pageNumbers.map(
+                  (page) => (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() =>
+                        setCurrentPage(page)
+                      }
+                      className={`min-w-9 rounded-lg px-3 py-2 text-sm font-medium transition ${currentPage === page
+                          ? "bg-blue-600 text-white"
+                          : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                        }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+
+                {/* Next */}
+
+                <button
+                  type="button"
+                  disabled={
+                    currentPage ===
+                    totalPages
+                  }
+                  onClick={() =>
+                    setCurrentPage(
+                      (page) =>
+                        page + 1
+                    )
+                  }
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
-
-      {/* ================================================== */}
-      {/* INQUIRY / CONVERSATION MODAL */}
-      {/* ================================================== */}
 
       {selectedInquiry && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
 
           <div className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
 
-            {/* -------------------------------- */}
             {/* Modal Header */}
-            {/* -------------------------------- */}
 
             <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-6 py-5">
 
@@ -769,9 +896,7 @@ export default function Inquiries() {
               </button>
             </div>
 
-            {/* -------------------------------- */}
             {/* Scrollable Modal Content */}
-            {/* -------------------------------- */}
 
             <div className="flex-1 overflow-y-auto">
 
@@ -827,9 +952,9 @@ export default function Inquiries() {
                         handleStatusChange(
                           selectedInquiry,
                           e.target.value as
-                            | "Pending"
-                            | "In Progress"
-                            | "Resolved"
+                          | "Pending"
+                          | "In Progress"
+                          | "Resolved"
                         )
                       }
                       className="mt-1 h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500"
@@ -861,9 +986,7 @@ export default function Inquiries() {
                   </p>
                 </div>
 
-                {/* ================================================= */}
                 {/* Conversation */}
-                {/* ================================================= */}
 
                 <div>
 
@@ -943,20 +1066,18 @@ export default function Inquiries() {
                               key={
                                 response.responseId
                               }
-                              className={`flex ${
-                                isAdmin
+                              className={`flex ${isAdmin
                                   ? "justify-end"
                                   : "justify-start"
-                              }`}
+                                }`}
                             >
                               <div className="max-w-[85%]">
 
                                 <div
-                                  className={`mb-1 flex items-center gap-2 ${
-                                    isAdmin
+                                  className={`mb-1 flex items-center gap-2 ${isAdmin
                                       ? "justify-end"
                                       : ""
-                                  }`}
+                                    }`}
                                 >
                                   <span className="text-xs font-semibold text-slate-700">
                                     {isAdmin
@@ -972,11 +1093,10 @@ export default function Inquiries() {
                                 </div>
 
                                 <div
-                                  className={`rounded-2xl px-4 py-3 ${
-                                    isAdmin
+                                  className={`rounded-2xl px-4 py-3 ${isAdmin
                                       ? "rounded-tr-md bg-blue-600 text-white"
                                       : "rounded-tl-md bg-slate-100 text-slate-700"
-                                  }`}
+                                    }`}
                                 >
                                   <p className="whitespace-pre-wrap text-sm leading-6">
                                     {
@@ -986,11 +1106,10 @@ export default function Inquiries() {
                                 </div>
 
                                 <p
-                                  className={`mt-1 text-xs text-slate-400 ${
-                                    isAdmin
+                                  className={`mt-1 text-xs text-slate-400 ${isAdmin
                                       ? "text-right"
                                       : ""
-                                  }`}
+                                    }`}
                                 >
                                   {new Date(
                                     response.createdAt
@@ -1005,25 +1124,19 @@ export default function Inquiries() {
                   </div>
                 </div>
 
-                {/* ================================================= */}
                 {/* Reply */}
-                {/* ================================================= */}
 
                 <div className="border-t border-slate-200 pt-6">
 
-                  <div className="mb-3 flex items-center justify-between">
+                  <div className="mb-3">
+                    <h3 className="text-sm font-semibold text-slate-900">
+                      Reply to Inquiry
+                    </h3>
 
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-900">
-                        Reply to Inquiry
-                      </h3>
-
-                      <p className="mt-1 text-xs text-slate-400">
-                        Your response will be visible
-                        to the member.
-                      </p>
-                    </div>
-
+                    <p className="mt-1 text-xs text-slate-400">
+                      Your response will be visible
+                      to the member.
+                    </p>
                   </div>
 
                   <textarea
@@ -1069,9 +1182,7 @@ export default function Inquiries() {
               </div>
             </div>
 
-            {/* -------------------------------- */}
             {/* Modal Footer */}
-            {/* -------------------------------- */}
 
             <div className="flex shrink-0 justify-between border-t border-slate-200 px-6 py-4">
 
@@ -1091,7 +1202,7 @@ export default function Inquiries() {
                 <Trash2 size={17} />
 
                 {deleting ===
-                selectedInquiry.inquiryId
+                  selectedInquiry.inquiryId
                   ? "Deleting..."
                   : "Delete Inquiry"}
               </button>

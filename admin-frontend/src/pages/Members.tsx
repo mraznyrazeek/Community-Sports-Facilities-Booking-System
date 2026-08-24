@@ -35,6 +35,8 @@ import LoadingSpinner from "../components/common/LoadingSpinner";
 export default function Members() {
   const currentAdmin = getAdminMember();
 
+  const MEMBERS_PER_PAGE = 10;
+
   const [showSportsModal, setShowSportsModal] =
     useState(false);
 
@@ -61,6 +63,9 @@ export default function Members() {
 
   const [roleFilter, setRoleFilter] =
     useState("All");
+
+  const [memberPage, setMemberPage] =
+    useState(1);
 
   const [showEditModal, setShowEditModal] =
     useState(false);
@@ -112,6 +117,18 @@ export default function Members() {
   useEffect(() => {
     loadMembers();
   }, []);
+
+  /*
+   * Reset pagination whenever
+   * search or filters change.
+   */
+  useEffect(() => {
+    setMemberPage(1);
+  }, [
+    search,
+    statusFilter,
+    roleFilter,
+  ]);
 
   const totalMembers =
     members.length;
@@ -200,14 +217,60 @@ export default function Members() {
       roleFilter,
     ]);
 
+  /*
+   * Pagination
+   */
+
+  const totalMemberPages =
+    Math.ceil(
+      filteredMembers.length /
+      MEMBERS_PER_PAGE
+    );
+
+  const paginatedMembers =
+    useMemo(() => {
+      const startIndex =
+        (memberPage - 1) *
+        MEMBERS_PER_PAGE;
+
+      return filteredMembers.slice(
+        startIndex,
+        startIndex +
+        MEMBERS_PER_PAGE
+      );
+    }, [
+      filteredMembers,
+      memberPage,
+    ]);
+
+  /*
+   * Keep current page valid
+   * after deleting members or
+   * changing filters.
+   */
+  useEffect(() => {
+    if (
+      totalMemberPages > 0 &&
+      memberPage > totalMemberPages
+    ) {
+      setMemberPage(
+        totalMemberPages
+      );
+    }
+  }, [
+    totalMemberPages,
+    memberPage,
+  ]);
+
   const openEditModal = (
     member: Member
   ) => {
     setEditingMember(member);
 
     setIsEditingCurrentAdmin(
-      currentAdmin?.memberId === member.memberId
-    )
+      currentAdmin?.memberId ===
+      member.memberId
+    );
 
     setName(
       member.name || ""
@@ -246,6 +309,7 @@ export default function Members() {
     setPhone("");
     setRole("Member");
     setStatus("Active");
+    setIsEditingCurrentAdmin(false);
   };
 
   const handleUpdate = async (
@@ -263,10 +327,12 @@ export default function Members() {
       await updateMember(
         editingMember.memberId,
         {
-          memberId: editingMember.memberId,
+          memberId:
+            editingMember.memberId,
           name: name.trim(),
           email: email.trim(),
-          phone: phone.trim() || null,
+          phone:
+            phone.trim() || null,
           status: status,
           userRole: role,
         }
@@ -275,9 +341,11 @@ export default function Members() {
       await loadMembers();
 
       closeEditModal();
-
     } catch (error: any) {
-      console.error("Update member error:", error);
+      console.error(
+        "Update member error:",
+        error
+      );
 
       alert(
         error?.message ||
@@ -291,10 +359,16 @@ export default function Members() {
   const removeMember = async (
     id: number
   ) => {
-    const currentAdmin = getAdminMember();
+    const currentAdmin =
+      getAdminMember();
 
-    if (currentAdmin?.memberId === id) {
-      alert("You cannot delete your own account.");
+    if (
+      currentAdmin?.memberId ===
+      id
+    ) {
+      alert(
+        "You cannot delete your own account."
+      );
       return;
     }
 
@@ -308,6 +382,15 @@ export default function Members() {
       return;
     }
 
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to delete ${member.name}?`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
     try {
       await deleteMember(id);
 
@@ -318,7 +401,6 @@ export default function Members() {
               item.memberId !== id
           )
       );
-
     } catch (error: any) {
       console.error(
         "Failed to delete member:",
@@ -340,9 +422,10 @@ export default function Members() {
       setShowSportsModal(true);
       setLoadingSports(true);
 
-      const data = await getMemberSports(
-        member.memberId
-      );
+      const data =
+        await getMemberSports(
+          member.memberId
+        );
 
       setMemberSports(data || []);
     } catch (error: any) {
@@ -381,10 +464,11 @@ export default function Members() {
   return (
     <div className="space-y-7">
 
+      {/* Page Header */}
+
       <div>
         <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
           <Users size={16} />
-
           Management
         </div>
 
@@ -398,6 +482,8 @@ export default function Members() {
           status.
         </p>
       </div>
+
+      {/* Statistics */}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
@@ -507,6 +593,8 @@ export default function Members() {
 
       </div>
 
+      {/* Filters */}
+
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
 
         <div className="flex flex-col gap-3 lg:flex-row">
@@ -567,7 +655,6 @@ export default function Members() {
                 event.target.value
               )
             }
-
             className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
           >
             <option value="All">
@@ -587,6 +674,8 @@ export default function Members() {
 
       </div>
 
+      {/* Member Directory */}
+
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
@@ -598,11 +687,13 @@ export default function Members() {
 
             <p className="mt-1 text-xs text-slate-400">
               Showing{" "}
-              {
-                filteredMembers.length
-              }{" "}
+              <span className="font-medium text-slate-600">
+                {filteredMembers.length}
+              </span>{" "}
               of{" "}
-              {members.length}{" "}
+              <span className="font-medium text-slate-600">
+                {members.length}
+              </span>{" "}
               members
             </p>
           </div>
@@ -671,7 +762,7 @@ export default function Members() {
 
               ) : (
 
-                filteredMembers.map(
+                paginatedMembers.map(
                   (member) => {
 
                     const isActive =
@@ -700,9 +791,7 @@ export default function Members() {
 
                             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-50 font-bold text-blue-600">
                               {member.name
-                                ?.charAt(
-                                  0
-                                )
+                                ?.charAt(0)
                                 .toUpperCase() ||
                                 "M"}
                             </div>
@@ -774,8 +863,8 @@ export default function Members() {
 
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${isAdmin
-                              ? "bg-purple-50 text-purple-600"
-                              : "bg-blue-50 text-blue-600"
+                                ? "bg-purple-50 text-purple-600"
+                                : "bg-blue-50 text-blue-600"
                               }`}
                           >
 
@@ -804,15 +893,15 @@ export default function Members() {
 
                           <span
                             className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${isActive
-                              ? "bg-emerald-50 text-emerald-600"
-                              : "bg-slate-100 text-slate-500"
+                                ? "bg-emerald-50 text-emerald-600"
+                                : "bg-slate-100 text-slate-500"
                               }`}
                           >
 
                             <span
                               className={`h-1.5 w-1.5 rounded-full ${isActive
-                                ? "bg-emerald-500"
-                                : "bg-slate-400"
+                                  ? "bg-emerald-500"
+                                  : "bg-slate-400"
                                 }`}
                             />
 
@@ -857,12 +946,16 @@ export default function Members() {
                             <button
                               type="button"
                               onClick={() =>
-                                openSportsModal(member)
+                                openSportsModal(
+                                  member
+                                )
                               }
                               title="View joined sports"
                               className="rounded-lg p-2 text-slate-400 transition hover:bg-emerald-50 hover:text-emerald-600"
                             >
-                              <Trophy size={17} />
+                              <Trophy
+                                size={17}
+                              />
                             </button>
 
                             <button
@@ -911,116 +1004,265 @@ export default function Members() {
           </table>
 
         </div>
-        {showSportsModal && selectedMember && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
 
-            <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+        {/* Pagination */}
 
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+        {filteredMembers.length >
+          MEMBERS_PER_PAGE && (
+            <div className="flex flex-col gap-3 border-t border-slate-100 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
 
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900">
-                    Joined Sports
-                  </h2>
+              {/* Showing range */}
 
-                  <p className="mt-1 text-xs text-slate-400">
-                    Sports registered by{" "}
-                    <span className="font-semibold text-slate-600">
-                      {selectedMember.name}
-                    </span>
-                  </p>
-                </div>
+              <p className="text-sm text-slate-500">
+
+                Showing{" "}
+
+                <span className="font-medium text-slate-700">
+                  {(memberPage - 1) *
+                    MEMBERS_PER_PAGE +
+                    1}
+                </span>
+
+                {" – "}
+
+                <span className="font-medium text-slate-700">
+                  {Math.min(
+                    memberPage *
+                    MEMBERS_PER_PAGE,
+                    filteredMembers.length
+                  )}
+                </span>
+
+                {" of "}
+
+                <span className="font-medium text-slate-700">
+                  {filteredMembers.length}
+                </span>{" "}
+
+                members
+
+              </p>
+
+              {/* Pagination Controls */}
+
+              <div className="flex items-center gap-2">
+
+                {/* Previous */}
 
                 <button
                   type="button"
-                  onClick={closeSportsModal}
-                  className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                  onClick={() =>
+                    setMemberPage(
+                      (page) =>
+                        Math.max(
+                          page - 1,
+                          1
+                        )
+                    )
+                  }
+                  disabled={
+                    memberPage === 1
+                  }
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <X size={19} />
+                  Previous
+                </button>
+
+                {/* Page Numbers */}
+
+                <div className="flex items-center gap-1">
+
+                  {Array.from(
+                    {
+                      length:
+                        totalMemberPages,
+                    },
+                    (_, index) =>
+                      index + 1
+                  ).map((page) => (
+
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() =>
+                        setMemberPage(
+                          page
+                        )
+                      }
+                      className={`h-9 min-w-9 rounded-lg px-3 text-sm font-medium transition ${memberPage === page
+                          ? "bg-blue-600 text-white"
+                          : "text-slate-600 hover:bg-slate-100"
+                        }`}
+                    >
+                      {page}
+                    </button>
+
+                  ))}
+
+                </div>
+
+                {/* Next */}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMemberPage(
+                      (page) =>
+                        Math.min(
+                          page + 1,
+                          totalMemberPages
+                        )
+                    )
+                  }
+                  disabled={
+                    memberPage ===
+                    totalMemberPages
+                  }
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
                 </button>
 
               </div>
 
-              {/* Content */}
-              <div className="max-h-[450px] overflow-y-auto p-6">
+            </div>
+          )}
 
-                {loadingSports ? (
+        {/* Sports Modal */}
 
-                  <div className="flex items-center justify-center py-12">
-                    <LoadingSpinner text="Loading sports..." />
+        {showSportsModal &&
+          selectedMember && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
+
+              <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+
+                {/* Header */}
+
+                <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">
+                      Joined Sports
+                    </h2>
+
+                    <p className="mt-1 text-xs text-slate-400">
+                      Sports registered by{" "}
+                      <span className="font-semibold text-slate-600">
+                        {
+                          selectedMember.name
+                        }
+                      </span>
+                    </p>
                   </div>
 
-                ) : memberSports.length === 0 ? (
+                  <button
+                    type="button"
+                    onClick={
+                      closeSportsModal
+                    }
+                    className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                  >
+                    <X size={19} />
+                  </button>
 
-                  <div className="py-12 text-center">
+                </div>
 
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                      <Trophy size={24} />
+                {/* Content */}
+
+                <div className="max-h-[450px] overflow-y-auto p-6">
+
+                  {loadingSports ? (
+
+                    <div className="flex items-center justify-center py-12">
+                      <LoadingSpinner text="Loading sports..." />
                     </div>
 
-                    <p className="mt-4 font-semibold text-slate-700">
-                      No sports registered
-                    </p>
+                  ) : memberSports.length ===
+                    0 ? (
 
-                    <p className="mt-1 text-sm text-slate-400">
-                      This member has not joined any sports yet.
-                    </p>
+                    <div className="py-12 text-center">
 
-                  </div>
-
-                ) : (
-
-                  <div className="space-y-3">
-
-                    {memberSports.map((memberSport) => (
-
-                      <div
-                        key={`${memberSport.memberId}-${memberSport.sportId}`}
-                        className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4"
-                      >
-
-                        <div className="flex items-center gap-3">
-
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                            <Trophy size={18} />
-                          </div>
-
-                          <div>
-
-                            <p className="font-semibold text-slate-800">
-                              {memberSport.sport?.sportName ||
-                                "Unknown Sport"}
-                            </p>
-
-                            <p className="mt-1 text-xs text-slate-400">
-                              Joined{" "}
-                              {memberSport.joinedAt
-                                ? new Date(
-                                  memberSport.joinedAt
-                                ).toLocaleDateString("en-GB")
-                                : "—"}
-                            </p>
-
-                          </div>
-
-                        </div>
-
+                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                        <Trophy size={24} />
                       </div>
 
-                    ))}
+                      <p className="mt-4 font-semibold text-slate-700">
+                        No sports registered
+                      </p>
 
-                  </div>
+                      <p className="mt-1 text-sm text-slate-400">
+                        This member has not joined any sports yet.
+                      </p>
 
-                )}
+                    </div>
+
+                  ) : (
+
+                    <div className="space-y-3">
+
+                      {memberSports.map(
+                        (
+                          memberSport
+                        ) => (
+
+                          <div
+                            key={`${memberSport.memberId}-${memberSport.sportId}`}
+                            className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4"
+                          >
+
+                            <div className="flex items-center gap-3">
+
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                                <Trophy
+                                  size={18}
+                                />
+                              </div>
+
+                              <div>
+
+                                <p className="font-semibold text-slate-800">
+                                  {
+                                    memberSport
+                                      .sport
+                                      ?.sportName ||
+                                    "Unknown Sport"
+                                  }
+                                </p>
+
+                                <p className="mt-1 text-xs text-slate-400">
+                                  Joined{" "}
+                                  {memberSport.joinedAt
+                                    ? new Date(
+                                      memberSport.joinedAt
+                                    ).toLocaleDateString(
+                                      "en-GB"
+                                    )
+                                    : "—"}
+                                </p>
+
+                              </div>
+
+                            </div>
+
+                          </div>
+
+                        )
+                      )}
+
+                    </div>
+
+                  )}
+
+                </div>
 
               </div>
 
             </div>
+          )}
 
-          </div>
-        )}
       </div>
+
+      {/* Edit Member Modal */}
 
       {showEditModal &&
         editingMember && (
@@ -1151,6 +1393,7 @@ export default function Members() {
                   <div>
                     <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
                       Role
+
                       {isEditingCurrentAdmin && (
                         <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
                           Locked
@@ -1160,13 +1403,20 @@ export default function Members() {
 
                     <select
                       value={role}
-                      onChange={(event) =>
-                        setRole(event.target.value)
+                      onChange={(
+                        event
+                      ) =>
+                        setRole(
+                          event.target
+                            .value
+                        )
                       }
-                      disabled={isEditingCurrentAdmin}
+                      disabled={
+                        isEditingCurrentAdmin
+                      }
                       className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${isEditingCurrentAdmin
-                        ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
-                        : "border-slate-200 bg-white text-slate-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                          ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                          : "border-slate-200 bg-white text-slate-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                         }`}
                     >
                       <option value="Member">
@@ -1190,6 +1440,7 @@ export default function Members() {
                   <div>
                     <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
                       Status
+
                       {isEditingCurrentAdmin && (
                         <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
                           Locked
@@ -1199,13 +1450,20 @@ export default function Members() {
 
                     <select
                       value={status}
-                      onChange={(event) =>
-                        setStatus(event.target.value)
+                      onChange={(
+                        event
+                      ) =>
+                        setStatus(
+                          event.target
+                            .value
+                        )
                       }
-                      disabled={isEditingCurrentAdmin}
+                      disabled={
+                        isEditingCurrentAdmin
+                      }
                       className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${isEditingCurrentAdmin
-                        ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
-                        : "border-slate-200 bg-white text-slate-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                          ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                          : "border-slate-200 bg-white text-slate-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                         }`}
                     >
                       <option value="Active">
@@ -1224,36 +1482,37 @@ export default function Members() {
                     )}
                   </div>
 
-                  {/* Buttons */}
+                </div>
 
-                  <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
+                {/* Buttons */}
 
-                    <button
-                      type="button"
-                      onClick={
-                        closeEditModal
-                      }
-                      disabled={
-                        saving
-                      }
-                      className="rounded-xl bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-200 disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
+                <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
 
-                    <button
-                      type="submit"
-                      disabled={
-                        saving
-                      }
-                      className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {saving
-                        ? "Saving..."
-                        : "Save Changes"}
-                    </button>
+                  <button
+                    type="button"
+                    onClick={
+                      closeEditModal
+                    }
+                    disabled={
+                      saving
+                    }
+                    className="rounded-xl bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-200 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
 
-                  </div>
+                  <button
+                    type="submit"
+                    disabled={
+                      saving
+                    }
+                    className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {saving
+                      ? "Saving..."
+                      : "Save Changes"}
+                  </button>
+
                 </div>
 
               </form>

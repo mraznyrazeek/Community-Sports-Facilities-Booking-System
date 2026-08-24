@@ -6,9 +6,22 @@ import {
   type Review,
 } from "../services/api";
 
+const REVIEWS_PER_PAGE = 10;
+
+type ReviewSort =
+  | "newest"
+  | "oldest"
+  | "highest"
+  | "lowest";
+
 export default function Reviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] =
+    useState<ReviewSort>("newest");
+
+  const [currentPage, setCurrentPage] = useState(1);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -144,15 +157,18 @@ export default function Reviews() {
     }
   }
 
+  /*
+   * Search + sorting
+   */
   const filteredReviews = useMemo(() => {
     const value =
       search.toLowerCase().trim();
 
-    if (!value) {
-      return reviews;
-    }
+    let result = reviews.filter((review) => {
+      if (!value) {
+        return true;
+      }
 
-    return reviews.filter((review) => {
       return (
         review.memberName
           ?.toLowerCase()
@@ -168,10 +184,108 @@ export default function Reviews() {
           .includes(value)
       );
     });
-  }, [reviews, search]);
+
+    /*
+     * Sorting
+     */
+    result = [...result].sort(
+      (a, b) => {
+        switch (sortBy) {
+          case "newest":
+            return (
+              new Date(
+                b.createdAt
+              ).getTime() -
+              new Date(
+                a.createdAt
+              ).getTime()
+            );
+
+          case "oldest":
+            return (
+              new Date(
+                a.createdAt
+              ).getTime() -
+              new Date(
+                b.createdAt
+              ).getTime()
+            );
+
+          case "highest":
+            return b.rating - a.rating;
+
+          case "lowest":
+            return a.rating - b.rating;
+
+          default:
+            return 0;
+        }
+      }
+    );
+
+    return result;
+  }, [reviews, search, sortBy]);
+
+  /*
+   * Reset to page 1 whenever
+   * search or filter changes.
+   */
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortBy]);
+
+  /*
+   * Pagination
+   */
+  const totalPages = Math.ceil(
+    filteredReviews.length /
+      REVIEWS_PER_PAGE
+  );
+
+  const paginatedReviews = useMemo(() => {
+    const startIndex =
+      (currentPage - 1) *
+      REVIEWS_PER_PAGE;
+
+    const endIndex =
+      startIndex + REVIEWS_PER_PAGE;
+
+    return filteredReviews.slice(
+      startIndex,
+      endIndex
+    );
+  }, [
+    filteredReviews,
+    currentPage,
+  ]);
+
+  /*
+   * Keep current page valid after
+   * deleting the last item on a page.
+   */
+  useEffect(() => {
+    if (
+      totalPages > 0 &&
+      currentPage > totalPages
+    ) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  function goToPage(page: number) {
+    if (
+      page < 1 ||
+      page > totalPages
+    ) {
+      return;
+    }
+
+    setCurrentPage(page);
+  }
 
   return (
     <div>
+      {/* Page Header */}
       <div>
         <p className="text-sm font-medium text-blue-600">
           Community
@@ -187,13 +301,16 @@ export default function Reviews() {
         </p>
       </div>
 
+      {/* Error */}
       {error && (
         <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-red-600">
           {error}
         </div>
       )}
 
-      <div className="mt-8">
+      {/* Search + Filter */}
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Search */}
         <div className="relative w-full max-w-xl">
           <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
             <svg
@@ -223,8 +340,42 @@ export default function Reviews() {
             className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-gray-900 outline-none transition focus:border-blue-500"
           />
         </div>
+
+        {/* Sort Filter */}
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="text-sm text-gray-500">
+            Sort:
+          </span>
+
+          <select
+            value={sortBy}
+            onChange={(e) =>
+              setSortBy(
+                e.target.value as ReviewSort
+              )
+            }
+            className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 outline-none transition focus:border-blue-500"
+          >
+            <option value="newest">
+              Newest
+            </option>
+
+            <option value="oldest">
+              Oldest
+            </option>
+
+            <option value="highest">
+              Highest Rating
+            </option>
+
+            <option value="lowest">
+              Lowest Rating
+            </option>
+          </select>
+        </div>
       </div>
 
+      {/* Reviews */}
       <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         {loading ? (
           <div className="px-6 py-16 text-center">
@@ -234,7 +385,7 @@ export default function Reviews() {
               Loading reviews...
             </p>
           </div>
-        ) : filteredReviews.length ===
+        ) : paginatedReviews.length ===
           0 ? (
           <div className="px-6 py-16 text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-50">
@@ -264,7 +415,7 @@ export default function Reviews() {
           </div>
         ) : (
           <div>
-            {filteredReviews.map(
+            {paginatedReviews.map(
               (review) => (
                 <div
                   key={review.reviewId}
@@ -272,6 +423,7 @@ export default function Reviews() {
                 >
                   <div className="flex items-start justify-between gap-6">
                     <div className="min-w-0 flex-1">
+                      {/* Member */}
                       <div className="flex items-center gap-4">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50 text-lg font-semibold text-blue-600">
                           {review.memberName
@@ -293,6 +445,7 @@ export default function Reviews() {
                         </div>
                       </div>
 
+                      {/* Facility */}
                       <div className="mt-5 rounded-xl bg-gray-50 px-4 py-3">
                         <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
                           Facility
@@ -304,6 +457,7 @@ export default function Reviews() {
                         </p>
                       </div>
 
+                      {/* Rating */}
                       <div className="mt-4 flex items-center">
                         <div className="flex">
                           {[1, 2, 3, 4, 5].map(
@@ -328,12 +482,14 @@ export default function Reviews() {
                         </span>
                       </div>
 
+                      {/* Comment */}
                       {review.commentText && (
                         <p className="mt-4 leading-6 text-gray-700">
                           {review.commentText}
                         </p>
                       )}
 
+                      {/* Date */}
                       <p className="mt-3 text-sm text-gray-400">
                         {new Date(
                           review.createdAt
@@ -341,7 +497,9 @@ export default function Reviews() {
                       </p>
                     </div>
 
+                    {/* Actions */}
                     <div className="flex shrink-0 items-center gap-2">
+                      {/* Edit */}
                       <button
                         type="button"
                         onClick={() =>
@@ -363,6 +521,7 @@ export default function Reviews() {
                         </svg>
                       </button>
 
+                      {/* Delete */}
                       <button
                         type="button"
                         onClick={() =>
@@ -396,6 +555,94 @@ export default function Reviews() {
         )}
       </div>
 
+      {/* Pagination */}
+      {!loading &&
+        totalPages > 1 && (
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Result count */}
+            <p className="text-sm text-gray-500">
+              Showing{" "}
+              <span className="font-medium text-gray-700">
+                {(currentPage - 1) *
+                  REVIEWS_PER_PAGE +
+                  1}
+              </span>{" "}
+              -
+              <span className="font-medium text-gray-700">
+                {" "}
+                {Math.min(
+                  currentPage *
+                    REVIEWS_PER_PAGE,
+                  filteredReviews.length
+                )}
+              </span>{" "}
+              of{" "}
+              <span className="font-medium text-gray-700">
+                {filteredReviews.length}
+              </span>{" "}
+              reviews
+            </p>
+
+            {/* Page controls */}
+            <div className="flex items-center gap-1">
+              {/* Previous */}
+              <button
+                type="button"
+                onClick={() =>
+                  goToPage(
+                    currentPage - 1
+                  )
+                }
+                disabled={
+                  currentPage === 1
+                }
+                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Previous
+              </button>
+
+              {/* Page Numbers */}
+              {Array.from(
+                { length: totalPages },
+                (_, index) => index + 1
+              ).map((page) => (
+                <button
+                  key={page}
+                  type="button"
+                  onClick={() =>
+                    goToPage(page)
+                  }
+                  className={
+                    page === currentPage
+                      ? "rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white"
+                      : "rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
+                  }
+                >
+                  {page}
+                </button>
+              ))}
+
+              {/* Next */}
+              <button
+                type="button"
+                onClick={() =>
+                  goToPage(
+                    currentPage + 1
+                  )
+                }
+                disabled={
+                  currentPage ===
+                  totalPages
+                }
+                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+
+      {/* Edit Review Modal */}
       {editingReview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
@@ -421,6 +668,7 @@ export default function Reviews() {
               </button>
             </div>
 
+            {/* Rating */}
             <div className="mt-6">
               <label className="text-sm font-medium text-gray-700">
                 Rating
@@ -439,7 +687,8 @@ export default function Reviews() {
                     >
                       <span
                         className={
-                          star <= editRating
+                          star <=
+                          editRating
                             ? "text-yellow-500"
                             : "text-gray-300"
                         }
@@ -456,6 +705,7 @@ export default function Reviews() {
               </div>
             </div>
 
+            {/* Comment */}
             <div className="mt-5">
               <label className="text-sm font-medium text-gray-700">
                 Comment
@@ -479,6 +729,7 @@ export default function Reviews() {
               </p>
             </div>
 
+            {/* Modal Buttons */}
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
