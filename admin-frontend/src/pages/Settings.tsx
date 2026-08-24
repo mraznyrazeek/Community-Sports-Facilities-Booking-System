@@ -404,9 +404,9 @@ export default function Settings() {
 
 
       await changeAdminPassword(
-  selectedAdmin.memberId,
-  adminNewPassword
-);
+        selectedAdmin.memberId,
+        adminNewPassword
+      );
       setResetMessage(
         "Administrator password updated successfully."
       );
@@ -442,7 +442,7 @@ export default function Settings() {
     if (
       admin?.memberId &&
       Number(admin.memberId) ===
-        Number(adminMember.memberId)
+      Number(adminMember.memberId)
     ) {
       setDeleteError(
         "You cannot delete the administrator account currently signed in."
@@ -479,7 +479,7 @@ export default function Settings() {
       if (
         selectedAdmin &&
         Number(selectedAdmin.memberId) ===
-          Number(adminMember.memberId)
+        Number(adminMember.memberId)
       ) {
         closeAdminDetails();
       }
@@ -504,40 +504,19 @@ export default function Settings() {
   return (
     <div className="space-y-6">
 
-      {/* ======================================================
-          PAGE HEADER
-      ====================================================== */}
+      <div>
+        <p className="text-sm font-semibold text-blue-600">
+          Administration
+        </p>
 
-      <section className="rounded-2xl border border-slate-200 bg-white">
+        <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
+          Settings
+        </h1>
 
-        <div className="flex items-center gap-5 px-6 py-6">
-
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white">
-            <ShieldCheck
-              size={27}
-              strokeWidth={2}
-            />
-          </div>
-
-          <div>
-            <p className="text-sm font-semibold text-blue-600">
-              Administration
-            </p>
-
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
-              Settings
-            </h1>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Manage your administrator account,
-              security settings and authorized
-              administrator access.
-            </p>
-          </div>
-
-        </div>
-
-      </section>
+        <p className="mt-2 text-sm text-slate-500">
+          Manage your administrator account, security settings and authorized administrator access.
+        </p>
+      </div>
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
 
@@ -1042,9 +1021,9 @@ export default function Settings() {
                       const isCurrentAdmin =
                         admin?.memberId &&
                         Number(admin.memberId) ===
-                          Number(
-                            adminMember.memberId
-                          );
+                        Number(
+                          adminMember.memberId
+                        );
 
                       return (
                         <tr
@@ -1204,7 +1183,7 @@ export default function Settings() {
                                 >
 
                                   {deletingAdminId ===
-                                  adminMember.memberId ? (
+                                    adminMember.memberId ? (
                                     <RefreshCw
                                       size={14}
                                       className="animate-spin"
@@ -1482,8 +1461,8 @@ export default function Settings() {
 
                       {selectedAdmin.createdAt
                         ? new Date(
-                            selectedAdmin.createdAt
-                          ).toLocaleDateString()
+                          selectedAdmin.createdAt
+                        ).toLocaleDateString()
                         : "Not available"}
 
                     </p>
@@ -1526,7 +1505,7 @@ export default function Settings() {
                 {/* Own account */}
 
                 {admin?.memberId &&
-                Number(admin.memberId) ===
+                  Number(admin.memberId) ===
                   Number(
                     selectedAdmin.memberId
                   ) ? (

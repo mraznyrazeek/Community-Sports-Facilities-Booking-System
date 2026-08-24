@@ -238,35 +238,30 @@ export default function Facilities() {
     <div className="space-y-7">
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+  <div>
+    <p className="flex items-center gap-2 text-sm font-semibold text-blue-600">
+      <Building2 size={18} />
+      Community Management
+    </p>
 
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <Building2 size={22} />
-            </div>
+    <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+      Facilities
+    </h1>
 
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-                Facilities
-              </h1>
+    <p className="mt-2 text-sm text-slate-500">
+      Manage sports facilities, locations and operating hours.
+    </p>
+  </div>
 
-              <p className="mt-1 text-sm text-slate-500">
-                Manage sports facilities, locations and
-                operating hours.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleAdd}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md"
-        >
-          <Plus size={18} />
-          Add Facility
-        </button>
-      </div>
+  <button
+    type="button"
+    onClick={handleAdd}
+    className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md"
+  >
+    <Plus size={18} />
+    Add Facility
+  </button>
+</div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
