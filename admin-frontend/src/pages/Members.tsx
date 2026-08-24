@@ -23,12 +23,15 @@ import {
   getMembers,
   updateMember,
   deleteMember,
+  getAdminMember,
   type Member,
 } from "../services/api";
 
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
 export default function Members() {
+  const currentAdmin = getAdminMember();
+
   const [members, setMembers] =
     useState<Member[]>([]);
 
@@ -67,6 +70,11 @@ export default function Members() {
 
   const [saving, setSaving] =
     useState(false);
+
+  const [
+    isEditingCurrentAdmin,
+    setIsEditingCurrentAdmin,
+  ] = useState(false);
 
   const loadMembers = async () => {
     try {
@@ -151,17 +159,17 @@ export default function Members() {
 
           const matchesStatus =
             statusFilter ===
-              "All" ||
+            "All" ||
             member.status
               ?.toLowerCase() ===
-              statusFilter.toLowerCase();
+            statusFilter.toLowerCase();
 
           const matchesRole =
             roleFilter ===
-              "All" ||
+            "All" ||
             member.role
               ?.toLowerCase() ===
-              roleFilter.toLowerCase();
+            roleFilter.toLowerCase();
 
           return (
             matchesSearch &&
@@ -181,6 +189,10 @@ export default function Members() {
     member: Member
   ) => {
     setEditingMember(member);
+
+    setIsEditingCurrentAdmin(
+      currentAdmin?.memberId === member.memberId
+    )
 
     setName(
       member.name || ""
@@ -222,48 +234,55 @@ export default function Members() {
   };
 
   const handleUpdate = async (
-  event: React.FormEvent
-) => {
-  event.preventDefault();
+    event: React.FormEvent
+  ) => {
+    event.preventDefault();
 
-  if (!editingMember) {
-    return;
-  }
+    if (!editingMember) {
+      return;
+    }
 
-  try {
-    setSaving(true);
+    try {
+      setSaving(true);
 
-    await updateMember(
-      editingMember.memberId,
-      {
-        memberId: editingMember.memberId,
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone.trim() || null,
-        status: status,
-        userRole: role,
-      }
-    );
+      await updateMember(
+        editingMember.memberId,
+        {
+          memberId: editingMember.memberId,
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim() || null,
+          status: status,
+          userRole: role,
+        }
+      );
 
-    await loadMembers();
+      await loadMembers();
 
-    closeEditModal();
+      closeEditModal();
 
-  } catch (error: any) {
-    console.error("Update member error:", error);
+    } catch (error: any) {
+      console.error("Update member error:", error);
 
-    alert(
-      error?.message ||
-      "Unable to update member."
-    );
-  } finally {
-    setSaving(false);
-  }
-};
+      alert(
+        error?.message ||
+        "Unable to update member."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const removeMember = async (
     id: number
   ) => {
+    const currentAdmin = getAdminMember();
+
+    if (currentAdmin?.memberId === id) {
+      alert("You cannot delete your own account.");
+      return;
+    }
+
     const member =
       members.find(
         (item) =>
@@ -271,15 +290,6 @@ export default function Members() {
       );
 
     if (!member) {
-      return;
-    }
-
-    const confirmed =
-      window.confirm(
-        `Are you sure you want to delete ${member.name}?`
-      );
-
-    if (!confirmed) {
       return;
     }
 
@@ -302,7 +312,7 @@ export default function Members() {
 
       alert(
         error?.message ||
-          "Unable to delete member."
+        "Unable to delete member."
       );
     }
   };
@@ -504,6 +514,7 @@ export default function Members() {
                 event.target.value
               )
             }
+
             className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
           >
             <option value="All">
@@ -709,11 +720,10 @@ export default function Members() {
                         <td className="px-6 py-5">
 
                           <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                              isAdmin
-                                ? "bg-purple-50 text-purple-600"
-                                : "bg-blue-50 text-blue-600"
-                            }`}
+                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${isAdmin
+                              ? "bg-purple-50 text-purple-600"
+                              : "bg-blue-50 text-blue-600"
+                              }`}
                           >
 
                             {isAdmin ? (
@@ -740,19 +750,17 @@ export default function Members() {
                         <td className="px-6 py-5">
 
                           <span
-                            className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                              isActive
-                                ? "bg-emerald-50 text-emerald-600"
-                                : "bg-slate-100 text-slate-500"
-                            }`}
+                            className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${isActive
+                              ? "bg-emerald-50 text-emerald-600"
+                              : "bg-slate-100 text-slate-500"
+                              }`}
                           >
 
                             <span
-                              className={`h-1.5 w-1.5 rounded-full ${
-                                isActive
-                                  ? "bg-emerald-500"
-                                  : "bg-slate-400"
-                              }`}
+                              className={`h-1.5 w-1.5 rounded-full ${isActive
+                                ? "bg-emerald-500"
+                                : "bg-slate-400"
+                                }`}
                             />
 
                             {
@@ -777,10 +785,10 @@ export default function Members() {
 
                             {member.createdAt
                               ? new Date(
-                                  member.createdAt
-                                ).toLocaleDateString(
-                                  "en-GB"
-                                )
+                                member.createdAt
+                              ).toLocaleDateString(
+                                "en-GB"
+                              )
                               : "—"}
 
                           </div>
@@ -969,24 +977,26 @@ export default function Members() {
                   {/* Role */}
 
                   <div>
-
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
                       Role
+                      {isEditingCurrentAdmin && (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                          Locked
+                        </span>
+                      )}
                     </label>
 
                     <select
                       value={role}
-                      onChange={(
-                        event
-                      ) =>
-                        setRole(
-                          event.target
-                            .value
-                        )
+                      onChange={(event) =>
+                        setRole(event.target.value)
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                      disabled={isEditingCurrentAdmin}
+                      className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${isEditingCurrentAdmin
+                        ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                        : "border-slate-200 bg-white text-slate-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                        }`}
                     >
-
                       <option value="Member">
                         Member
                       </option>
@@ -994,32 +1004,38 @@ export default function Members() {
                       <option value="Admin">
                         Admin
                       </option>
-
                     </select>
 
+                    {isEditingCurrentAdmin && (
+                      <p className="mt-1.5 text-xs text-slate-400">
+                        Your own administrator role cannot be changed.
+                      </p>
+                    )}
                   </div>
 
                   {/* Status */}
 
                   <div>
-
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                    <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
                       Status
+                      {isEditingCurrentAdmin && (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                          Locked
+                        </span>
+                      )}
                     </label>
 
                     <select
                       value={status}
-                      onChange={(
-                        event
-                      ) =>
-                        setStatus(
-                          event.target
-                            .value
-                        )
+                      onChange={(event) =>
+                        setStatus(event.target.value)
                       }
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                      disabled={isEditingCurrentAdmin}
+                      className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${isEditingCurrentAdmin
+                        ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                        : "border-slate-200 bg-white text-slate-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                        }`}
                     >
-
                       <option value="Active">
                         Active
                       </option>
@@ -1027,42 +1043,45 @@ export default function Members() {
                       <option value="Inactive">
                         Inactive
                       </option>
-
                     </select>
 
+                    {isEditingCurrentAdmin && (
+                      <p className="mt-1.5 text-xs text-slate-400">
+                        Your own account status cannot be changed.
+                      </p>
+                    )}
                   </div>
 
-                </div>
+                  {/* Buttons */}
 
-                {/* Buttons */}
+                  <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
 
-                <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
+                    <button
+                      type="button"
+                      onClick={
+                        closeEditModal
+                      }
+                      disabled={
+                        saving
+                      }
+                      className="rounded-xl bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-200 disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={
-                      closeEditModal
-                    }
-                    disabled={
-                      saving
-                    }
-                    className="rounded-xl bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-200 disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
+                    <button
+                      type="submit"
+                      disabled={
+                        saving
+                      }
+                      className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {saving
+                        ? "Saving..."
+                        : "Save Changes"}
+                    </button>
 
-                  <button
-                    type="submit"
-                    disabled={
-                      saving
-                    }
-                    className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {saving
-                      ? "Saving..."
-                      : "Save Changes"}
-                  </button>
-
+                  </div>
                 </div>
 
               </form>

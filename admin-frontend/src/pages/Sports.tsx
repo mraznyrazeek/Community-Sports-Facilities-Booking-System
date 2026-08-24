@@ -121,46 +121,48 @@ export default function Sports() {
   };
 
   const handleSubmit = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
-    event.preventDefault();
+  event: React.FormEvent<HTMLFormElement>
+) => {
+  event.preventDefault();
 
-    const name = form.sportName.trim();
-    const description = form.description.trim();
+  const name = form.sportName.trim();
+  const description = form.description.trim();
 
-    if (!name) {
-      setError("Sport name is required.");
-      return;
-    }
+  if (!name) {
+    setError("Sport name is required.");
+    return;
+  }
 
-    try {
-      setSaving(true);
-      setError("");
+  try {
+    setSaving(true);
+    setError("");
 
-      const data = {
+    if (editingId !== null) {
+      await updateSport(editingId, {
+        sportId: editingId,
         sportName: name,
         description,
-      };
-
-      if (editingId !== null) {
-        await updateSport(editingId, data);
-      } else {
-        await createSport(data);
-      }
-
-      closeForm();
-      await loadSports();
-    } catch (err: any) {
-      setError(
-        err?.message ||
-          (editingId !== null
-            ? "Unable to update sport."
-            : "Unable to create sport.")
-      );
-    } finally {
-      setSaving(false);
+      });
+    } else {
+      await createSport({
+        sportName: name,
+        description,
+      });
     }
-  };
+
+    closeForm();
+    await loadSports();
+  } catch (err: any) {
+    setError(
+      err?.message ||
+        (editingId !== null
+          ? "Unable to update sport."
+          : "Unable to create sport.")
+    );
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleDelete = async (sport: Sport) => {
     const confirmed = window.confirm(

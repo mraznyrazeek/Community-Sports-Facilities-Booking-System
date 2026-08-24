@@ -267,7 +267,7 @@ export async function changeAdminPassword(
   newPassword: string
 ) {
   return request<{ message: string }>(
-    `/Auth/admin/${memberId}/change-password`,
+    `/Auth/admins/${memberId}/password`,
     {
       method: "PUT",
       body: JSON.stringify({
