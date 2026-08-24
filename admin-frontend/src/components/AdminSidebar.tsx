@@ -3,7 +3,6 @@ import {
   Building2,
   CalendarDays,
   ChevronRight,
-  CircleHelp,
   LogOut,
   MessageSquare,
   Settings,
@@ -75,20 +74,21 @@ export default function AdminSidebar({
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
+      className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-slate-800 bg-slate-900 transition-transform duration-300 lg:translate-x-0 ${
         mobileOpen
           ? "translate-x-0"
           : "-translate-x-full"
       }`}
     >
-      <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-slate-200 px-5">
+      {/* Logo */}
+      <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-slate-800 px-5">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/20">
             <Trophy size={22} strokeWidth={2.2} />
           </div>
 
           <div>
-            <h1 className="text-lg font-bold tracking-tight text-slate-900">
+            <h1 className="text-lg font-bold tracking-tight text-white">
               SportsHub
             </h1>
 
@@ -98,22 +98,25 @@ export default function AdminSidebar({
           </div>
         </div>
 
+        {/* Mobile close button */}
         <button
           type="button"
           aria-label="Close navigation"
           onClick={onClose}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 lg:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden"
         >
           <X size={19} />
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-5">
+      {/* Navigation */}
+      <nav className="flex-1 min-h-0 overflow-hidden px-3 py-4">
+        {/* Management */}
         <p className="mb-3 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
           Management
         </p>
 
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           {navigation.map((item) => {
             const Icon = item.icon;
 
@@ -123,17 +126,18 @@ export default function AdminSidebar({
                 to={item.path}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `group relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-200 ${
+                  `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 ${
                     isActive
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
+                    {/* Active indicator */}
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-blue-600" />
+                      <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-blue-400" />
                     )}
 
                     <Icon
@@ -141,8 +145,8 @@ export default function AdminSidebar({
                       strokeWidth={isActive ? 2.3 : 2}
                       className={`transition ${
                         isActive
-                          ? "text-blue-600"
-                          : "text-slate-500 group-hover:text-slate-700"
+                          ? "text-white"
+                          : "text-slate-400 group-hover:text-white"
                       }`}
                     />
 
@@ -154,7 +158,8 @@ export default function AdminSidebar({
           })}
         </div>
 
-        <p className="mb-3 mt-8 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+        {/* System */}
+        <p className="mb-3 mt-5 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
           System
         </p>
 
@@ -162,25 +167,27 @@ export default function AdminSidebar({
           to="/settings"
           onClick={onClose}
           className={({ isActive }) =>
-            `group relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-all ${
+            `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
               isActive
-                ? "bg-blue-50 text-blue-600"
-                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
+                : "text-slate-300 hover:bg-slate-800 hover:text-white"
             }`
           }
         >
           {({ isActive }) => (
             <>
+              {/* Active indicator */}
               {isActive && (
-                <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-blue-600" />
+                <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-blue-400" />
               )}
 
               <Settings
                 size={19}
+                strokeWidth={isActive ? 2.3 : 2}
                 className={
                   isActive
-                    ? "text-blue-600"
-                    : "text-slate-500"
+                    ? "text-white"
+                    : "text-slate-400 group-hover:text-white"
                 }
               />
 
@@ -188,40 +195,27 @@ export default function AdminSidebar({
             </>
           )}
         </NavLink>
-
-        {/* <button
-          type="button"
-          onClick={() => {
-            window.location.href =
-              "mailto:support@example.com";
-          }}
-          className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
-        >
-          <CircleHelp
-            size={19}
-            className="text-slate-500"
-          />
-
-          <span>Help & Support</span>
-        </button> */}
       </nav>
 
-      <div className="shrink-0 border-t border-slate-200 p-4">
+      {/* User section */}
+      <div className="shrink-0 border-t border-slate-800 p-3">
         <NavLink
           to="/profile"
           onClick={onClose}
-          className="mb-3 flex items-center gap-3 rounded-xl bg-slate-50 p-3 transition hover:bg-slate-100"
+          className="mb-2 flex items-center gap-3 rounded-xl bg-slate-800 p-2.5 transition hover:bg-slate-700"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-600">
+          {/* Avatar */}
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 font-bold text-white">
             {firstLetter}
           </div>
 
+          {/* User information */}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-slate-900">
+            <p className="truncate text-sm font-semibold text-white">
               {adminName}
             </p>
 
-            <p className="truncate text-xs text-slate-500">
+            <p className="truncate text-xs text-slate-400">
               Administrator
             </p>
           </div>
@@ -232,10 +226,11 @@ export default function AdminSidebar({
           />
         </NavLink>
 
+        {/* Sign out */}
         <button
           type="button"
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50 hover:text-red-600"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
         >
           <LogOut size={19} />
 
