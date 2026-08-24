@@ -5,6 +5,25 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace SportsBooking.API.Controllers
 {
+    // DTO used specifically when updating a member
+    public class UpdateMemberRequest
+    {
+        public decimal MemberId { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+
+        public string Email { get; set; } = string.Empty;
+
+        public string? Phone { get; set; }
+
+        public string Status { get; set; } = "Active";
+
+        public string? UserRole { get; set; }
+
+        // Password is OPTIONAL when editing
+        public string? Password { get; set; }
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = "Admin")]
@@ -17,6 +36,7 @@ namespace SportsBooking.API.Controllers
             _context = context;
         }
 
+        // GET: api/Members
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetMembers()
         {
@@ -36,6 +56,7 @@ namespace SportsBooking.API.Controllers
             return Ok(members);
         }
 
+        // GET: api/Members/5
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> GetMember(decimal id)
         {
@@ -64,6 +85,7 @@ namespace SportsBooking.API.Controllers
             return Ok(member);
         }
 
+        // POST: api/Members
         [HttpPost]
         public async Task<ActionResult<object>> CreateMember(Member member)
         {
@@ -77,7 +99,8 @@ namespace SportsBooking.API.Controllers
             {
                 return Conflict(new
                 {
-                    message = "A member with this email already exists."
+                    message =
+                        "A member with this email already exists."
                 });
             }
 
@@ -103,8 +126,9 @@ namespace SportsBooking.API.Controllers
 
             if (!string.IsNullOrWhiteSpace(member.Password))
             {
-                member.Password = BCrypt.Net.BCrypt.HashPassword(
-                    member.Password);
+                member.Password =
+                    BCrypt.Net.BCrypt.HashPassword(
+                        member.Password);
             }
 
             _context.Members.Add(member);
@@ -129,10 +153,11 @@ namespace SportsBooking.API.Controllers
             );
         }
 
+        // PUT: api/Members/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMember(
             decimal id,
-            Member member)
+            UpdateMemberRequest member)
         {
             if (id != member.MemberId)
             {
@@ -156,6 +181,7 @@ namespace SportsBooking.API.Controllers
 
             var email = member.Email.Trim();
 
+            // Check duplicate email
             var emailExists = await _context.Members
                 .AnyAsync(m =>
                     m.Email.ToLower() == email.ToLower() &&
@@ -170,10 +196,18 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
-            existingMember.Name = member.Name.Trim();
-            existingMember.Email = email;
-            existingMember.Phone = member.Phone;
-            existingMember.Status = member.Status;
+            // Update member details
+            existingMember.Name =
+                member.Name.Trim();
+
+            existingMember.Email =
+                email;
+
+            existingMember.Phone =
+                member.Phone;
+
+            existingMember.Status =
+                member.Status;
 
             if (!string.IsNullOrWhiteSpace(member.UserRole))
             {
@@ -181,6 +215,7 @@ namespace SportsBooking.API.Controllers
                     member.UserRole.Trim();
             }
 
+            // Only change password if a new password was entered
             if (!string.IsNullOrWhiteSpace(member.Password))
             {
                 existingMember.Password =
@@ -193,6 +228,7 @@ namespace SportsBooking.API.Controllers
             return NoContent();
         }
 
+        // DELETE: api/Members/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMember(decimal id)
         {

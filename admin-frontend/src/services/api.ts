@@ -6,8 +6,18 @@ export type Member = {
   email: string;
   phone?: string | null;
   status: string;
+  role?: string | null;
   createdAt: string;
-  userRole?: string;
+};
+
+export type UpdateMemberRequest = {
+  memberId: number;
+  name: string;
+  email: string;
+  phone?: string | null;
+  status: string;
+  userRole?: string | null;
+  password?: string | null;
 };
 
 export type Sport = {
@@ -38,11 +48,14 @@ export type Booking = {
   endTime: string;
   status: string;
   createdAt: string;
+
   member?: {
     memberId: number;
     name: string;
     email: string;
+    phone?: string | null;
   } | null;
+
   facility?: {
     facilityId: number;
     facilityName: string;
@@ -53,19 +66,13 @@ export type Booking = {
 export type Review = {
   reviewId: number;
   memberId: number;
+  memberName: string;
+  memberEmail?: string | null;
   facilityId: number;
+  facilityName: string;
   rating: number;
   commentText?: string | null;
   createdAt: string;
-  member?: {
-    memberId: number;
-    name: string;
-    email: string;
-  } | null;
-  facility?: {
-    facilityId: number;
-    facilityName: string;
-  } | null;
 };
 
 export type Inquiry = {
@@ -83,8 +90,8 @@ export type LoginResponse = {
   message: string;
   token: string;
   member: Member & {
-    role?: string;
-    userRole?: string;
+    role?: string | null;
+    userRole?: string | null;
   };
 };
 
@@ -102,19 +109,25 @@ async function request<T>(
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  const response = await fetch(
+    `${API_BASE_URL}${endpoint}`,
+    {
+      ...options,
+      headers,
+    }
+  );
 
   if (response.status === 401) {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminMember");
+
     window.location.href = "/login";
+
     throw new Error("Your session has expired.");
   }
 
-  const contentType = response.headers.get("content-type") || "";
+  const contentType =
+    response.headers.get("content-type") || "";
 
   let data: any = null;
 
@@ -153,15 +166,22 @@ export async function login(
   email: string,
   password: string
 ): Promise<LoginResponse> {
-  const data = await request<LoginResponse>("/Auth/login", {
-    method: "POST",
-    body: JSON.stringify({
-      email,
-      password,
-    }),
-  });
+  const data = await request<LoginResponse>(
+    "/Auth/login",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    }
+  );
 
-  localStorage.setItem("adminToken", data.token);
+  localStorage.setItem(
+    "adminToken",
+    data.token
+  );
+
   localStorage.setItem(
     "adminMember",
     JSON.stringify(data.member)
@@ -173,15 +193,21 @@ export async function login(
 export function logout() {
   localStorage.removeItem("adminToken");
   localStorage.removeItem("adminMember");
+
   window.location.href = "/login";
 }
 
 export function isAuthenticated() {
-  return Boolean(localStorage.getItem("adminToken"));
+  return Boolean(
+    localStorage.getItem("adminToken")
+  );
 }
 
-export function getAdminMember(): Member | null {
-  const value = localStorage.getItem("adminMember");
+export function getAdminMember():
+  | Member
+  | null {
+  const value =
+    localStorage.getItem("adminMember");
 
   if (!value) {
     return null;
@@ -194,6 +220,8 @@ export function getAdminMember(): Member | null {
   }
 }
 
+/* Members */
+
 export async function getMembers() {
   return request<Member[]>("/Members");
 }
@@ -204,13 +232,11 @@ export async function getMember(id: number) {
 
 export async function updateMember(
   id: number,
-  member: Partial<Member> & {
-    memberId: number;
-  }
+  data: UpdateMemberRequest
 ) {
   return request<void>(`/Members/${id}`, {
     method: "PUT",
-    body: JSON.stringify(member),
+    body: JSON.stringify(data),
   });
 }
 
@@ -219,6 +245,8 @@ export async function deleteMember(id: number) {
     method: "DELETE",
   });
 }
+
+/* Sports */
 
 export async function getSports() {
   return request<Sport[]>("/Sports");
@@ -253,6 +281,8 @@ export async function deleteSport(id: number) {
     method: "DELETE",
   });
 }
+
+/* Facilities */
 
 export async function getFacilities() {
   return request<Facility[]>("/Facilities");
@@ -294,6 +324,8 @@ export async function deleteFacility(id: number) {
   });
 }
 
+/* Bookings */
+
 export async function getBookings() {
   return request<Booking[]>("/Bookings");
 }
@@ -302,25 +334,48 @@ export async function getBooking(id: number) {
   return request<Booking>(`/Bookings/${id}`);
 }
 
+export async function confirmBooking(id: number) {
+  return request<{
+    message: string;
+    bookingId: number;
+    status: string;
+  }>(`/Bookings/${id}/confirm`, {
+    method: "PUT",
+  });
+}
+
+export async function cancelBooking(id: number) {
+  return request<{
+    message: string;
+    bookingId: number;
+    status: string;
+  }>(`/Bookings/${id}/cancel`, {
+    method: "PUT",
+  });
+}
+
 export async function deleteBooking(id: number) {
   return request<void>(`/Bookings/${id}`, {
     method: "DELETE",
   });
 }
 
-export async function cancelBooking(id: number) {
-  return request<void>(`/Bookings/${id}/cancel`, {
-    method: "PUT",
-  });
-}
+/* Reviews */
 
 export async function getReviews() {
   return request<Review[]>("/Reviews");
 }
 
+export async function getReview(id: number) {
+  return request<Review>(`/Reviews/${id}`);
+}
+
 export async function updateReview(
   id: number,
-  data: Review
+  data: {
+    rating: number;
+    commentText?: string | null;
+  }
 ) {
   return request<void>(`/Reviews/${id}`, {
     method: "PUT",
@@ -333,6 +388,8 @@ export async function deleteReview(id: number) {
     method: "DELETE",
   });
 }
+
+/* Inquiries */
 
 export async function getInquiries() {
   return request<Inquiry[]>("/Inquiries");

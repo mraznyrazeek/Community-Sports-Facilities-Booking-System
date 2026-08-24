@@ -16,8 +16,8 @@ import {
   getMembers,
 } from "../services/api";
 
-import LoadingSpinner from "../components/LoadingSpinner";
-import StatCard from "../components/StatCard";
+import LoadingSpinner from "../components/common/LoadingSpinner";
+import StatCard from "../components/common/StatCard";
 
 export default function Dashboard() {
 

@@ -20,7 +20,7 @@ import {
   type Sport,
 } from "../services/api";
 
-import LoadingSpinner from "../components/LoadingSpinner";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 type FacilityForm = {
   sportId: number;

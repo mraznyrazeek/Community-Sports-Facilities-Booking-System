@@ -7,16 +7,13 @@ import {
 import AdminLayout from "./components/AdminLayout";
 import Login from "./pages/Login";
 
-import {
-  BookingsPage,
-  Dashboard,
-  FacilitiesPage,
-  InquiriesPage,
-  MembersPage,
-  ReviewsPage,
-  SettingsPage,
-  SportsPage,
-} from "./pages/AdminPages";
+import Dashboard from "./pages/Dashboard";
+import Sports from "./pages/Sports";
+import Facilities from "./pages/Facilities";
+import Bookings from "./pages/Bookings";
+import Members from "./pages/Members";
+import Reviews from "./pages/Reviews";
+import Inquiries from "./pages/Inquiries";
 
 import { isAuthenticated } from "./services/api";
 
@@ -31,11 +28,13 @@ function ProtectedRoutes() {
 export default function App() {
   return (
     <Routes>
+      {/* Login */}
       <Route
         path="/login"
         element={<Login />}
       />
 
+      {/* Protected Admin Routes */}
       <Route
         element={<ProtectedRoutes />}
       >
@@ -56,40 +55,36 @@ export default function App() {
 
         <Route
           path="/sports"
-          element={<SportsPage />}
+          element={<Sports />}
         />
 
         <Route
           path="/facilities"
-          element={<FacilitiesPage />}
+          element={<Facilities />}
         />
 
         <Route
           path="/bookings"
-          element={<BookingsPage />}
+          element={<Bookings />}
         />
 
         <Route
           path="/members"
-          element={<MembersPage />}
+          element={<Members />}
         />
 
         <Route
           path="/reviews"
-          element={<ReviewsPage />}
+          element={<Reviews />}
         />
 
         <Route
           path="/inquiries"
-          element={<InquiriesPage />}
-        />
-
-        <Route
-          path="/settings"
-          element={<SettingsPage />}
+          element={<Inquiries />}
         />
       </Route>
 
+      {/* Unknown routes */}
       <Route
         path="*"
         element={

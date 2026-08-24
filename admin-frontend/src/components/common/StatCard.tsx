@@ -1,11 +1,11 @@
 import { ArrowUpRight } from "lucide-react";
-import { ReactNode } from "react";
+import type { ElementType } from "react";
 
 interface StatCardProps {
   title: string;
   value: number | string;
   description: string;
-  icon: ReactNode;
+  icon: ElementType;
   href?: string;
 }
 
@@ -13,14 +13,16 @@ export default function StatCard({
   title,
   value,
   description,
-  icon,
+  icon: Icon,
   href,
 }: StatCardProps) {
   const content = (
     <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+      
       <div className="absolute right-0 top-0 h-24 w-24 translate-x-8 -translate-y-8 rounded-full bg-blue-50 opacity-70 transition duration-300 group-hover:scale-125" />
 
       <div className="relative flex items-start justify-between">
+        
         <div>
           <p className="text-sm font-medium text-slate-500">
             {title}
@@ -36,8 +38,9 @@ export default function StatCard({
         </div>
 
         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-          {icon}
+          <Icon size={24} />
         </div>
+
       </div>
 
       {href && (
@@ -46,6 +49,7 @@ export default function StatCard({
           <ArrowUpRight size={14} />
         </div>
       )}
+
     </div>
   );
 

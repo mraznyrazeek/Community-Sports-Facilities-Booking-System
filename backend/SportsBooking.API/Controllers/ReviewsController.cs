@@ -18,59 +18,101 @@ namespace SportsBooking.API.Controllers
             _context = context;
         }
 
-        // GET: api/Reviews
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Review>>> GetReviews()
+        public async Task<ActionResult<IEnumerable<object>>> GetReviews()
         {
-            return await _context.Reviews
+            var reviews = await _context.Reviews
+                .Include(r => r.Member)
+                .Include(r => r.Facility)
+                .Select(r => new
+                {
+                    reviewId = r.ReviewId,
+                    memberId = r.MemberId,
+                    memberName = r.Member.Name,
+                    memberEmail = r.Member.Email,
+                    facilityId = r.FacilityId,
+                    facilityName = r.Facility.FacilityName,
+                    rating = r.Rating,
+                    commentText = r.CommentText,
+                    createdAt = r.CreatedAt
+                })
+                .OrderByDescending(r => r.createdAt)
                 .ToListAsync();
+
+            return Ok(reviews);
         }
 
-        // GET: api/Reviews/1
         [HttpGet("{id}")]
-        public async Task<ActionResult<Review>> GetReview(decimal id)
+        public async Task<ActionResult<object>> GetReview(decimal id)
         {
             var review = await _context.Reviews
-                .FirstOrDefaultAsync(r => r.ReviewId == id);
+                .Include(r => r.Member)
+                .Include(r => r.Facility)
+                .Where(r => r.ReviewId == id)
+                .Select(r => new
+                {
+                    reviewId = r.ReviewId,
+                    memberId = r.MemberId,
+                    memberName = r.Member.Name,
+                    memberEmail = r.Member.Email,
+                    facilityId = r.FacilityId,
+                    facilityName = r.Facility.FacilityName,
+                    rating = r.Rating,
+                    commentText = r.CommentText,
+                    createdAt = r.CreatedAt
+                })
+                .FirstOrDefaultAsync();
 
             if (review == null)
             {
-                return NotFound();
+                return NotFound(new
+                {
+                    message = "Review not found."
+                });
             }
 
             return Ok(review);
         }
 
-        // POST: api/Reviews
         [HttpPost]
         public async Task<ActionResult<Review>> CreateReview(
             CreateReviewRequest request)
         {
-            // Get logged-in member ID from JWT
             var memberId = GetCurrentMemberId();
 
             if (memberId == null)
             {
-                return Unauthorized(
-                    "Member identity could not be determined.");
+                return Unauthorized(new
+                {
+                    message = "Member identity could not be determined."
+                });
             }
 
-            // Check facility exists
+            if (request.Rating < 1 || request.Rating > 5)
+            {
+                return BadRequest(new
+                {
+                    message = "Rating must be between 1 and 5."
+                });
+            }
+
             var facilityExists = await _context.Facilities
                 .AnyAsync(f => f.FacilityId == request.FacilityId);
 
             if (!facilityExists)
             {
-                return BadRequest("Facility does not exist.");
+                return BadRequest(new
+                {
+                    message = "Facility does not exist."
+                });
             }
 
-            // Create review using logged-in member
             var review = new Review
             {
                 MemberId = memberId.Value,
                 FacilityId = request.FacilityId,
                 Rating = request.Rating,
-                CommentText = request.CommentText,
+                CommentText = request.CommentText?.Trim(),
                 CreatedAt = DateTime.Now
             };
 
@@ -81,68 +123,88 @@ namespace SportsBooking.API.Controllers
             return CreatedAtAction(
                 nameof(GetReview),
                 new { id = review.ReviewId },
-                review);
+                review
+            );
         }
 
-        // PUT: api/Reviews/1
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateReview(
             decimal id,
             UpdateReviewRequest request)
         {
-            // Get logged-in member ID from JWT
             var memberId = GetCurrentMemberId();
 
             if (memberId == null)
             {
-                return Unauthorized(
-                    "Member identity could not be determined.");
+                return Unauthorized(new
+                {
+                    message = "Member identity could not be determined."
+                });
             }
 
-            // Find review belonging to logged-in member
+            if (request.Rating < 1 || request.Rating > 5)
+            {
+                return BadRequest(new
+                {
+                    message = "Rating must be between 1 and 5."
+                });
+            }
+
             var review = await _context.Reviews
-                .FirstOrDefaultAsync(r =>
-                    r.ReviewId == id &&
-                    r.MemberId == memberId.Value);
+                .FirstOrDefaultAsync(r => r.ReviewId == id);
 
             if (review == null)
             {
-                return NotFound(
-                    "Review does not exist or does not belong to you.");
+                return NotFound(new
+                {
+                    message = "Review not found."
+                });
             }
 
-            // Only update allowed fields
+            var isAdmin = User.IsInRole("Admin");
+
+            if (!isAdmin && review.MemberId != memberId.Value)
+            {
+                return Forbid();
+            }
+
             review.Rating = request.Rating;
-            review.CommentText = request.CommentText;
+            review.CommentText = request.CommentText?.Trim();
 
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        // DELETE: api/Reviews/1
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(decimal id)
         {
-            // Get logged-in member ID from JWT
             var memberId = GetCurrentMemberId();
 
             if (memberId == null)
             {
-                return Unauthorized(
-                    "Member identity could not be determined.");
+                return Unauthorized(new
+                {
+                    message = "Member identity could not be determined."
+                });
             }
 
-            // Find review belonging to logged-in member
             var review = await _context.Reviews
-                .FirstOrDefaultAsync(r =>
-                    r.ReviewId == id &&
-                    r.MemberId == memberId.Value);
+                .FirstOrDefaultAsync(r => r.ReviewId == id);
 
             if (review == null)
             {
-                return NotFound(
-                    "Review does not exist or does not belong to you.");
+                return NotFound(new
+                {
+                    message = "Review not found."
+                });
+            }
+
+            var isAdmin = User.IsInRole("Admin");
+
+            if (!isAdmin && review.MemberId != memberId.Value)
+            {
+                return Forbid();
             }
 
             _context.Reviews.Remove(review);
@@ -152,13 +214,15 @@ namespace SportsBooking.API.Controllers
             return NoContent();
         }
 
-        // Get logged-in member ID from JWT
         private decimal? GetCurrentMemberId()
         {
             var memberIdClaim = User.FindFirst(
-                ClaimTypes.NameIdentifier)?.Value;
+                ClaimTypes.NameIdentifier
+            )?.Value;
 
-            if (decimal.TryParse(memberIdClaim, out var memberId))
+            if (decimal.TryParse(
+                memberIdClaim,
+                out var memberId))
             {
                 return memberId;
             }
@@ -167,7 +231,6 @@ namespace SportsBooking.API.Controllers
         }
     }
 
-    // Request model for creating a review
     public class CreateReviewRequest
     {
         public decimal FacilityId { get; set; }
@@ -177,7 +240,6 @@ namespace SportsBooking.API.Controllers
         public string? CommentText { get; set; }
     }
 
-    // Request model for updating a review
     public class UpdateReviewRequest
     {
         public decimal Rating { get; set; }
