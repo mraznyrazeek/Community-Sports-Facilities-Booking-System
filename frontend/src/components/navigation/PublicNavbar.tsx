@@ -1,16 +1,11 @@
-import { useState } from "react";
+import { Menu, Trophy, X } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
-import {
-    Menu,
-    X,
-    Trophy,
-    User,
-} from "lucide-react";
+import { useState } from "react";
 
 export default function PublicNavbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
 
-    const closeMobileMenu = () => {
+    const closeMobile = () => {
         setMobileOpen(false);
     };
 
@@ -32,7 +27,7 @@ export default function PublicNavbar() {
             path: "/reviews",
         },
         {
-            label: "Inquiries",
+            label: "Contact",
             path: "/inquiries",
         },
     ];
@@ -40,35 +35,32 @@ export default function PublicNavbar() {
     return (
         <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
             <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-
                 <Link
                     to="/"
-                    onClick={closeMobileMenu}
-                    className="flex items-center gap-3"
+                    onClick={closeMobile}
+                    className="flex items-center gap-2.5"
                 >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
-                        <Trophy
-                            size={21}
-                            strokeWidth={2.3}
-                        />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white">
+                        <Trophy size={19} strokeWidth={2.3} />
                     </div>
 
-                    <div className="leading-none">
-                        <div className="text-lg font-bold tracking-tight text-slate-900">
+                    <div>
+                        <p className="text-base font-bold tracking-tight text-slate-900">
                             SportsHub
-                        </div>
+                        </p>
 
-                        <div className="mt-1 text-[10px] font-medium text-slate-400">
+                        <p className="hidden text-[10px] font-medium text-slate-400 sm:block">
                             Community Sports
-                        </div>
+                        </p>
                     </div>
                 </Link>
 
-                <nav className="hidden items-center gap-1 lg:flex">
+                <nav className="hidden items-center gap-1 md:flex">
                     {navItems.map((item) => (
                         <NavLink
                             key={item.path}
                             to={item.path}
+                            end={item.path === "/"}
                             className={({ isActive }) =>
                                 `rounded-lg px-3.5 py-2 text-sm font-medium transition ${
                                     isActive
@@ -82,20 +74,19 @@ export default function PublicNavbar() {
                     ))}
                 </nav>
 
-                <div className="hidden items-center gap-2 lg:flex">
+                <div className="hidden items-center gap-2 md:flex">
                     <Link
                         to="/login"
-                        className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                        className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
                     >
-                        Login
+                        Sign In
                     </Link>
 
                     <Link
                         to="/register"
-                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
                     >
-                        <User size={16} />
-                        Create Account
+                        Get Started
                     </Link>
                 </div>
 
@@ -109,28 +100,28 @@ export default function PublicNavbar() {
                     onClick={() =>
                         setMobileOpen((value) => !value)
                     }
-                    className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-700 transition hover:bg-slate-100 lg:hidden"
+                    className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100 md:hidden"
                 >
                     {mobileOpen ? (
-                        <X size={22} />
+                        <X size={21} />
                     ) : (
-                        <Menu size={22} />
+                        <Menu size={21} />
                     )}
                 </button>
             </div>
 
             {mobileOpen && (
-                <div className="border-t border-slate-200 bg-white lg:hidden">
+                <div className="border-t border-slate-100 bg-white md:hidden">
                     <nav className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
-
                         <div className="space-y-1">
                             {navItems.map((item) => (
                                 <NavLink
                                     key={item.path}
                                     to={item.path}
-                                    onClick={closeMobileMenu}
+                                    end={item.path === "/"}
+                                    onClick={closeMobile}
                                     className={({ isActive }) =>
-                                        `block rounded-lg px-3 py-3 text-sm font-semibold transition ${
+                                        `block rounded-lg px-3 py-2.5 text-sm font-medium transition ${
                                             isActive
                                                 ? "bg-blue-50 text-blue-600"
                                                 : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
@@ -145,18 +136,18 @@ export default function PublicNavbar() {
                         <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
                             <Link
                                 to="/login"
-                                onClick={closeMobileMenu}
-                                className="rounded-lg border border-slate-200 px-4 py-2.5 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                onClick={closeMobile}
+                                className="flex h-10 items-center justify-center rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                             >
-                                Login
+                                Sign In
                             </Link>
 
                             <Link
                                 to="/register"
-                                onClick={closeMobileMenu}
-                                className="rounded-lg bg-blue-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
+                                onClick={closeMobile}
+                                className="flex h-10 items-center justify-center rounded-lg bg-blue-600 text-sm font-semibold text-white transition hover:bg-blue-700"
                             >
-                                Register
+                                Get Started
                             </Link>
                         </div>
                     </nav>

@@ -254,7 +254,7 @@ export default function AdminSidebar({
       <div className="shrink-0 border-t border-slate-800 p-3">
 
         <NavLink
-          to="/profile"
+          to="/settings"
           onClick={onClose}
           className="mb-2 flex items-center gap-3 rounded-xl bg-slate-800 p-2.5 transition hover:bg-slate-700"
         >
