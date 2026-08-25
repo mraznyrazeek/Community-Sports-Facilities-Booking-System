@@ -18,6 +18,7 @@ namespace SportsBooking.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<object>>> GetFacilities()
         {
             var facilities = await _context.Facilities
@@ -48,6 +49,7 @@ namespace SportsBooking.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<object>> GetFacility(decimal id)
         {
             var facility = await _context.Facilities

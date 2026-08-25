@@ -106,8 +106,9 @@ namespace SportsBooking.API.Controllers
 
         [HttpPost]
         public async Task<ActionResult<object>> CreateBooking(
-            BookingCreateRequest request)
+    BookingCreateRequest request)
         {
+
             var memberIdClaim = User.FindFirst(
                 ClaimTypes.NameIdentifier);
 
@@ -179,6 +180,47 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
+            var memberBookings = await _context.Bookings
+                .Include(b => b.Facility)
+                .Where(b =>
+                    b.MemberId == memberId &&
+                    b.BookingDate == request.BookingDate &&
+                    b.Status != "Cancelled")
+                .ToListAsync();
+
+            foreach (var existing in memberBookings)
+            {
+                if (!TimeSpan.TryParse(
+                        existing.StartTime,
+                        out var existingStart))
+                {
+                    continue;
+                }
+
+                if (!TimeSpan.TryParse(
+                        existing.EndTime,
+                        out var existingEnd))
+                {
+                    continue;
+                }
+
+                bool overlaps =
+                    requestedStart < existingEnd &&
+                    requestedEnd > existingStart;
+
+                if (overlaps)
+                {
+                    return BadRequest(new
+                    {
+                        message =
+                            $"You already have a booking at " +
+                            $"{existing.Facility?.FacilityName ?? "another facility"} " +
+                            $"from {existing.StartTime} to {existing.EndTime} " +
+                            $"on this date. Please choose a different time."
+                    });
+                }
+            }
+
             var existingBookings = await _context.Bookings
                 .Where(b =>
                     b.FacilityId == request.FacilityId &&
@@ -210,23 +252,13 @@ namespace SportsBooking.API.Controllers
                 {
                     return BadRequest(new
                     {
-                        message = "The facility is already booked during the selected time."
+                        message =
+                            $"The facility is already booked from " +
+                            $"{existing.StartTime} to {existing.EndTime}. " +
+                            $"Please choose a different time."
                     });
                 }
             }
-
-            //var booking = new Booking
-            //{
-            //    MemberId = memberId,
-            //    FacilityId = request.FacilityId,
-            //    BookingDate = request.BookingDate,
-            //    StartTime = request.StartTime,
-            //    EndTime = request.EndTime,
-            //    Status = string.IsNullOrWhiteSpace(request.Status)
-            //        ? "Confirmed"
-            //        : request.Status,
-            //    CreatedAt = DateTime.Now
-            //};
 
             var booking = new Booking
             {
@@ -608,8 +640,8 @@ namespace SportsBooking.API.Controllers
             }
 
             if (!decimal.TryParse(
-                    memberIdClaim.Value,
-                    out decimal memberId))
+                memberIdClaim.Value,
+                out decimal memberId))
             {
                 return Unauthorized();
             }
