@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportsBooking.API.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SportsBooking.API.Controllers
 {
@@ -17,17 +17,15 @@ namespace SportsBooking.API.Controllers
             _context = context;
         }
 
-        // GET: api/Sports
-        // All authenticated users can view sports
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Sport>>> GetSports()
         {
             return await _context.Sports.ToListAsync();
         }
 
-        // GET: api/Sports/5
-        // All authenticated users can view a sport
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<Sport>> GetSport(decimal id)
         {
             var sport = await _context.Sports
@@ -41,8 +39,6 @@ namespace SportsBooking.API.Controllers
             return sport;
         }
 
-        // POST: api/Sports
-        // Admin only
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Sport>> PostSport(Sport sport)
@@ -57,8 +53,6 @@ namespace SportsBooking.API.Controllers
                 sport);
         }
 
-        // PUT: api/Sports/1
-        // Admin only
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateSport(
@@ -78,7 +72,6 @@ namespace SportsBooking.API.Controllers
                 return NotFound();
             }
 
-            // Check duplicate sport name
             var duplicateName = await _context.Sports
                 .AnyAsync(s =>
                     s.SportId != id &&
@@ -98,8 +91,6 @@ namespace SportsBooking.API.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Sports/1
-        // Admin only
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteSport(decimal id)
@@ -112,7 +103,6 @@ namespace SportsBooking.API.Controllers
                 return NotFound();
             }
 
-            // Check whether the sport is being used by facilities
             var hasFacilities = await _context.Facilities
                 .AnyAsync(f => f.SportId == id);
 
@@ -122,7 +112,6 @@ namespace SportsBooking.API.Controllers
                     "This sport cannot be deleted because it is being used by a facility.");
             }
 
-            // Check whether members are registered for this sport
             var hasMembers = await _context.MemberSports
                 .AnyAsync(ms => ms.SportId == id);
 
