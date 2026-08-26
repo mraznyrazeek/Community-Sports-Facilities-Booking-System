@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import PublicNavbar from "../components/PublicNavbar";
+import PublicNavbar from "../components/navigation/PublicNavbar";
 import { getSports } from "../services/api";
 
 interface Sport {
