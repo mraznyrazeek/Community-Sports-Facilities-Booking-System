@@ -18,15 +18,15 @@ namespace SportsBooking.API.Controllers
             _context = context;
         }
 
-        // GET: api/Inquiries
-        // Admin can see all inquiries.
-        // Normal members can see only their own inquiries.
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Inquiry>>> GetInquiries()
         {
             if (User.IsInRole("Admin"))
             {
                 var allInquiries = await _context.Inquiries
+                    .Include(i => i.Responses)
+                    .OrderByDescending(i => i.CreatedAt)
                     .ToListAsync();
 
                 return Ok(allInquiries);
@@ -41,15 +41,14 @@ namespace SportsBooking.API.Controllers
             }
 
             var inquiries = await _context.Inquiries
+                .Include(i => i.Responses)
                 .Where(i => i.MemberId == memberId.Value)
+                .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
 
             return Ok(inquiries);
         }
 
-        // GET: api/Inquiries/1
-        // Admin can view any inquiry.
-        // Normal members can view only their own inquiry.
         [HttpGet("{id}")]
         public async Task<ActionResult<Inquiry>> GetInquiry(decimal id)
         {
@@ -58,6 +57,7 @@ namespace SportsBooking.API.Controllers
             if (User.IsInRole("Admin"))
             {
                 inquiry = await _context.Inquiries
+                    .Include(i => i.Responses)
                     .FirstOrDefaultAsync(i => i.InquiryId == id);
             }
             else
@@ -71,6 +71,7 @@ namespace SportsBooking.API.Controllers
                 }
 
                 inquiry = await _context.Inquiries
+                    .Include(i => i.Responses)
                     .FirstOrDefaultAsync(i =>
                         i.InquiryId == id &&
                         i.MemberId == memberId.Value);
@@ -78,18 +79,16 @@ namespace SportsBooking.API.Controllers
 
             if (inquiry == null)
             {
-                return NotFound(
-                    "Inquiry not found.");
+                return NotFound("Inquiry not found.");
             }
 
             return Ok(inquiry);
         }
 
-        // POST: api/Inquiries
-        // Logged-in members can create inquiries.
+
         [HttpPost]
         public async Task<ActionResult<object>> CreateInquiry(
-        CreateInquiryRequest request)
+            CreateInquiryRequest request)
         {
             var memberId = GetCurrentMemberId();
 
@@ -97,6 +96,16 @@ namespace SportsBooking.API.Controllers
             {
                 return Unauthorized(
                     "Member identity could not be determined.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Subject))
+            {
+                return BadRequest("Subject cannot be empty.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Message))
+            {
+                return BadRequest("Message cannot be empty.");
             }
 
             var member = await _context.Members
@@ -112,9 +121,10 @@ namespace SportsBooking.API.Controllers
                 MemberId = memberId.Value,
                 Name = member.Name,
                 Email = member.Email,
-                Subject = request.Subject,
-                Message = request.Message,
+                Subject = request.Subject.Trim(),
+                Message = request.Message.Trim(),
                 Status = "Pending"
+
             };
 
             _context.Inquiries.Add(inquiry);
@@ -137,9 +147,7 @@ namespace SportsBooking.API.Controllers
                 });
         }
 
-        // PUT: api/Inquiries/1
-        // Admin can update any inquiry.
-        // Normal members can update only their own inquiry.
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateInquiry(
             decimal id,
@@ -157,13 +165,47 @@ namespace SportsBooking.API.Controllers
                     return NotFound("Inquiry not found.");
                 }
 
-                // Admin can update the status as well.
-                inquiry.Subject = request.Subject;
-                inquiry.Message = request.Message;
+                // Keep the old status so we know if it changed.
+                var oldStatus = inquiry.Status;
+
+                if (!string.IsNullOrWhiteSpace(request.Subject))
+                {
+                    inquiry.Subject = request.Subject.Trim();
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Message))
+                {
+                    inquiry.Message = request.Message.Trim();
+                }
 
                 if (!string.IsNullOrWhiteSpace(request.Status))
                 {
-                    inquiry.Status = request.Status;
+                    inquiry.Status = request.Status.Trim();
+                }
+
+                if (!string.Equals(
+                        oldStatus,
+                        inquiry.Status,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    if (inquiry.Status.Equals(
+                            "In Progress",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        CreateInquiryNotification(
+                            inquiry,
+                            "Inquiry In Progress",
+                            $"Your inquiry \"{inquiry.Subject}\" is now in progress.");
+                    }
+                    else if (inquiry.Status.Equals(
+                             "Resolved",
+                             StringComparison.OrdinalIgnoreCase))
+                    {
+                        CreateInquiryNotification(
+                            inquiry,
+                            "Inquiry Resolved",
+                            $"Your inquiry \"{inquiry.Subject}\" has been resolved.");
+                    }
                 }
             }
             else
@@ -188,18 +230,125 @@ namespace SportsBooking.API.Controllers
                 }
 
                 // Members can only update subject and message.
-                inquiry.Subject = request.Subject;
-                inquiry.Message = request.Message;
+                if (!string.IsNullOrWhiteSpace(request.Subject))
+                {
+                    inquiry.Subject = request.Subject.Trim();
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Message))
+                {
+                    inquiry.Message = request.Message.Trim();
+                }
             }
+
 
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        // DELETE: api/Inquiries/1
-        // Admin can delete any inquiry.
-        // Normal members can delete only their own inquiry.
+        [HttpPost("{id}/Responses/Member")]
+        public async Task<ActionResult<InquiryResponse>> AddMemberResponse(
+        decimal id,
+        CreateInquiryResponseRequest request)
+        {
+            var memberId = GetCurrentMemberId();
+
+            if (memberId == null)
+            {
+                return Unauthorized(
+                    "Member identity could not be determined.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Message))
+            {
+                return BadRequest("Message cannot be empty.");
+            }
+
+            var inquiry = await _context.Inquiries
+                .FirstOrDefaultAsync(i =>
+                    i.InquiryId == id &&
+                    i.MemberId == memberId.Value);
+
+            if (inquiry == null)
+            {
+                return NotFound(
+                    "Inquiry not found or does not belong to you.");
+            }
+
+            if (inquiry.Status.Equals(
+                    "Resolved",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(
+                    "This inquiry has been resolved and cannot receive new replies.");
+            }
+
+            var response = new InquiryResponse
+            {
+                InquiryId = inquiry.InquiryId,
+                SenderRole = "Member",
+                Message = request.Message.Trim()
+                // CreatedAt is generated automatically by Oracle.
+            };
+
+            _context.InquiryResponses.Add(response);
+
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(
+                nameof(GetInquiry),
+                new { id = inquiry.InquiryId },
+                response);
+        }
+
+
+        [HttpPost("{id}/Responses/Admin")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<InquiryResponse>> AddAdminResponse(
+            decimal id,
+            CreateInquiryResponseRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Message))
+            {
+                return BadRequest("Message cannot be empty.");
+            }
+
+            var inquiry = await _context.Inquiries
+                .FirstOrDefaultAsync(i => i.InquiryId == id);
+
+            if (inquiry == null)
+            {
+                return NotFound("Inquiry not found.");
+            }
+
+            var response = new InquiryResponse
+            {
+                InquiryId = inquiry.InquiryId,
+                SenderRole = "Admin",
+                Message = request.Message.Trim()
+                // CreatedAt is generated by Oracle.
+            };
+
+            _context.InquiryResponses.Add(response);
+
+            inquiry.AdminResponse = request.Message.Trim();
+            inquiry.RespondedAt = DateTime.UtcNow;
+
+
+            CreateInquiryNotification(
+                inquiry,
+                "New Inquiry Response",
+                $"You have received a new response to your inquiry \"{inquiry.Subject}\".");
+
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(
+                nameof(GetInquiry),
+                new { id = inquiry.InquiryId },
+                response);
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteInquiry(decimal id)
         {
@@ -228,8 +377,7 @@ namespace SportsBooking.API.Controllers
 
             if (inquiry == null)
             {
-                return NotFound(
-                    "Inquiry not found.");
+                return NotFound("Inquiry not found.");
             }
 
             _context.Inquiries.Remove(inquiry);
@@ -239,7 +387,26 @@ namespace SportsBooking.API.Controllers
             return NoContent();
         }
 
-        // Get logged-in member ID from JWT
+        private void CreateInquiryNotification(
+            Inquiry inquiry,
+            string title,
+            string message)
+        {
+            var notification = new Notification
+            {
+                MemberId = inquiry.MemberId,
+                Title = title,
+                Message = message,
+                Type = "Inquiry",
+                ReferenceType = "Inquiry",
+                ReferenceId = inquiry.InquiryId,
+                IsRead = false
+                // CreatedAt is generated automatically by Oracle.
+            };
+
+            _context.Notifications.Add(notification);
+        }
+
         private decimal? GetCurrentMemberId()
         {
             var memberIdClaim = User.FindFirst(
@@ -256,7 +423,7 @@ namespace SportsBooking.API.Controllers
         }
     }
 
-    // Request model for creating an inquiry
+
     public class CreateInquiryRequest
     {
         public string Subject { get; set; } = null!;
@@ -264,7 +431,7 @@ namespace SportsBooking.API.Controllers
         public string Message { get; set; } = null!;
     }
 
-    // Request model for updating an inquiry
+
     public class UpdateInquiryRequest
     {
         public string Subject { get; set; } = null!;

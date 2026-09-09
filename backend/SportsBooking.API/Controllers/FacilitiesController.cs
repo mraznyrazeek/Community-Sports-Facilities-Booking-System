@@ -17,6 +17,11 @@ namespace SportsBooking.API.Controllers
             _context = context;
         }
 
+        // ============================================================
+        // GET ALL FACILITIES
+        // PUBLIC - NO LOGIN REQUIRED
+        // ============================================================
+
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<object>>> GetFacilities()
@@ -34,6 +39,22 @@ namespace SportsBooking.API.Controllers
                     closingTime = f.ClosingTime,
                     status = f.Status,
 
+                    // ====================================================
+                    // REAL REVIEW RATING
+                    // ====================================================
+
+                    averageRating = _context.Reviews
+                        .Where(r => r.FacilityId == f.FacilityId)
+                        .Select(r => (decimal?)r.Rating)
+                        .Average() ?? 0,
+
+                    reviewCount = _context.Reviews
+                        .Count(r => r.FacilityId == f.FacilityId),
+
+                    // ====================================================
+                    // SPORT
+                    // ====================================================
+
                     sport = f.Sport == null
                         ? null
                         : new
@@ -47,6 +68,11 @@ namespace SportsBooking.API.Controllers
 
             return Ok(facilities);
         }
+
+        // ============================================================
+        // GET SINGLE FACILITY
+        // PUBLIC - NO LOGIN REQUIRED
+        // ============================================================
 
         [HttpGet("{id}")]
         [AllowAnonymous]
@@ -65,6 +91,22 @@ namespace SportsBooking.API.Controllers
                     openingTime = f.OpeningTime,
                     closingTime = f.ClosingTime,
                     status = f.Status,
+
+                    // ====================================================
+                    // REAL REVIEW RATING
+                    // ====================================================
+
+                    averageRating = _context.Reviews
+                        .Where(r => r.FacilityId == f.FacilityId)
+                        .Select(r => (decimal?)r.Rating)
+                        .Average() ?? 0,
+
+                    reviewCount = _context.Reviews
+                        .Count(r => r.FacilityId == f.FacilityId),
+
+                    // ====================================================
+                    // SPORT
+                    // ====================================================
 
                     sport = f.Sport == null
                         ? null
@@ -87,6 +129,11 @@ namespace SportsBooking.API.Controllers
 
             return Ok(facility);
         }
+
+        // ============================================================
+        // CREATE FACILITY
+        // ADMIN ONLY
+        // ============================================================
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
@@ -140,7 +187,8 @@ namespace SportsBooking.API.Controllers
             {
                 return Conflict(new
                 {
-                    message = "The facility could not be created. The facility ID may already exist."
+                    message =
+                        "The facility could not be created. The facility ID may already exist."
                 });
             }
 
@@ -165,6 +213,11 @@ namespace SportsBooking.API.Controllers
             );
         }
 
+        // ============================================================
+        // UPDATE FACILITY
+        // ADMIN ONLY
+        // ============================================================
+
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutFacility(
@@ -183,7 +236,8 @@ namespace SportsBooking.API.Controllers
             {
                 return BadRequest(new
                 {
-                    message = "Facility ID in the URL does not match the Facility ID in the request body."
+                    message =
+                        "Facility ID in the URL does not match the Facility ID in the request body."
                 });
             }
 
@@ -219,7 +273,8 @@ namespace SportsBooking.API.Controllers
             {
                 return Conflict(new
                 {
-                    message = "Another facility already uses this name."
+                    message =
+                        "Another facility already uses this name."
                 });
             }
 
@@ -247,6 +302,11 @@ namespace SportsBooking.API.Controllers
             return NoContent();
         }
 
+        // ============================================================
+        // DELETE FACILITY
+        // ADMIN ONLY
+        // ============================================================
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteFacility(decimal id)
@@ -269,7 +329,8 @@ namespace SportsBooking.API.Controllers
             {
                 return Conflict(new
                 {
-                    message = "This facility cannot be deleted because it has existing bookings. Please set the facility status to Inactive instead."
+                    message =
+                        "This facility cannot be deleted because it has existing bookings. Please set the facility status to Inactive instead."
                 });
             }
 
@@ -283,7 +344,8 @@ namespace SportsBooking.API.Controllers
             {
                 return Conflict(new
                 {
-                    message = "This facility cannot be deleted because it is referenced by other records."
+                    message =
+                        "This facility cannot be deleted because it is referenced by other records."
                 });
             }
 

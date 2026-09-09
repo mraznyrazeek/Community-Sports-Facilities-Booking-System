@@ -14,7 +14,12 @@ import {
 import { Link } from "react-router-dom";
 
 import PublicNavbar from "../components/navigation/PublicNavbar";
-import { getSports } from "../services/api";
+import CustomerNavbar from "../components/navigation/CustomerNavbar";
+
+import {
+    getCurrentMember,
+    getSports,
+} from "../services/api";
 
 interface Sport {
     sportId: number;
@@ -26,12 +31,30 @@ export default function Home() {
     const [sports, setSports] = useState<Sport[]>([]);
     const [loadingSports, setLoadingSports] = useState(true);
 
+    // ============================================================
+    // CURRENT MEMBER / NAVBAR
+    // ============================================================
+
+    const member = getCurrentMember();
+
+    const isLoggedInMember =
+        !!localStorage.getItem("token") &&
+        member?.role?.toLowerCase() === "member";
+
+    // ============================================================
+    // LOAD SPORTS
+    // ============================================================
+
     useEffect(() => {
         const loadSports = async () => {
             try {
                 const data = await getSports();
 
-                setSports(Array.isArray(data) ? data : []);
+                setSports(
+                    Array.isArray(data)
+                        ? data
+                        : []
+                );
             } catch {
                 setSports([]);
             } finally {
@@ -47,7 +70,15 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-white text-slate-900">
 
-            <PublicNavbar />
+            {/* =========================================================
+                NAVBAR
+            ========================================================= */}
+
+            {isLoggedInMember ? (
+                <CustomerNavbar />
+            ) : (
+                <PublicNavbar />
+            )}
 
             {/* =========================================================
                 HERO
@@ -58,8 +89,11 @@ export default function Home() {
                 {/* Background decoration */}
 
                 <div className="pointer-events-none absolute inset-0">
+
                     <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-blue-600/20 blur-3xl" />
+
                     <div className="absolute right-0 top-20 h-[32rem] w-[32rem] rounded-full bg-indigo-600/20 blur-3xl" />
+
                     <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
 
                     <div
@@ -70,32 +104,43 @@ export default function Home() {
                             backgroundSize: "48px 48px",
                         }}
                     />
+
                 </div>
 
                 <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6 sm:pb-20 sm:pt-20 lg:px-8 lg:pb-24 lg:pt-24">
 
                     <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
 
-                        {/* LEFT */}
+                        {/* =================================================
+                            LEFT
+                        ================================================= */}
 
                         <div>
 
                             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-4 py-2 text-sm font-medium text-blue-100 backdrop-blur">
+
                                 <span className="flex h-2 w-2 rounded-full bg-emerald-400" />
+
                                 Community sports, made simple
+
                             </div>
 
                             <h1 className="max-w-3xl text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
+
                                 Find your game.
+
                                 <span className="mt-2 block bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-400 bg-clip-text text-transparent">
                                     Find your community.
                                 </span>
+
                             </h1>
 
                             <p className="mt-6 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+
                                 Discover local sports facilities, explore your
                                 favourite activities and book your next game
                                 from one simple community platform.
+
                             </p>
 
                             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -104,12 +149,14 @@ export default function Home() {
                                     to="/facilities"
                                     className="group inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500 hover:shadow-xl hover:shadow-blue-600/25"
                                 >
+
                                     Find a Facility
 
                                     <ArrowRight
                                         size={17}
                                         className="transition-transform group-hover:translate-x-1"
                                     />
+
                                 </Link>
 
                                 <Link
@@ -126,26 +173,34 @@ export default function Home() {
                             <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-400">
 
                                 <div className="flex items-center gap-2">
+
                                     <CheckCircle2
                                         size={16}
                                         className="text-emerald-400"
                                     />
+
                                     Easy facility discovery
+
                                 </div>
 
                                 <div className="flex items-center gap-2">
+
                                     <CheckCircle2
                                         size={16}
                                         className="text-emerald-400"
                                     />
+
                                     Simple online booking
+
                                 </div>
 
                             </div>
 
                         </div>
 
-                        {/* RIGHT - SEARCH CARD */}
+                        {/* =================================================
+                            RIGHT - SEARCH CARD
+                        ================================================= */}
 
                         <div className="relative">
 
@@ -158,10 +213,13 @@ export default function Home() {
                                     <div className="flex items-center gap-3">
 
                                         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/15 text-blue-300">
+
                                             <Search size={21} />
+
                                         </div>
 
                                         <div>
+
                                             <h2 className="font-semibold text-white">
                                                 Find a place to play
                                             </h2>
@@ -169,6 +227,7 @@ export default function Home() {
                                             <p className="mt-0.5 text-sm text-slate-400">
                                                 Discover available facilities
                                             </p>
+
                                         </div>
 
                                     </div>
@@ -178,13 +237,16 @@ export default function Home() {
                                 <div className="space-y-3">
 
                                     <div className="rounded-xl border border-white/10 bg-black/10 p-4">
+
                                         <div className="flex items-center gap-3">
+
                                             <Trophy
                                                 size={18}
                                                 className="text-blue-300"
                                             />
 
                                             <div>
+
                                                 <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
                                                     Sport
                                                 </p>
@@ -192,20 +254,26 @@ export default function Home() {
                                                 <p className="mt-1 text-sm font-medium text-white">
                                                     Tennis, football, basketball...
                                                 </p>
+
                                             </div>
+
                                         </div>
+
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-3">
 
                                         <div className="rounded-xl border border-white/10 bg-black/10 p-4">
+
                                             <div className="flex items-center gap-3">
+
                                                 <MapPin
                                                     size={18}
                                                     className="text-cyan-300"
                                                 />
 
                                                 <div className="min-w-0">
+
                                                     <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
                                                         Location
                                                     </p>
@@ -213,18 +281,24 @@ export default function Home() {
                                                     <p className="mt-1 truncate text-sm font-medium text-white">
                                                         Nearby facilities
                                                     </p>
+
                                                 </div>
+
                                             </div>
+
                                         </div>
 
                                         <div className="rounded-xl border border-white/10 bg-black/10 p-4">
+
                                             <div className="flex items-center gap-3">
+
                                                 <CalendarDays
                                                     size={18}
                                                     className="text-indigo-300"
                                                 />
 
                                                 <div>
+
                                                     <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
                                                         Date
                                                     </p>
@@ -232,20 +306,26 @@ export default function Home() {
                                                     <p className="mt-1 text-sm font-medium text-white">
                                                         Choose a date
                                                     </p>
+
                                                 </div>
+
                                             </div>
+
                                         </div>
 
                                     </div>
 
                                     <div className="rounded-xl border border-white/10 bg-black/10 p-4">
+
                                         <div className="flex items-center gap-3">
+
                                             <Clock3
                                                 size={18}
                                                 className="text-violet-300"
                                             />
 
                                             <div>
+
                                                 <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
                                                     Availability
                                                 </p>
@@ -253,8 +333,11 @@ export default function Home() {
                                                 <p className="mt-1 text-sm font-medium text-white">
                                                     Find a suitable time
                                                 </p>
+
                                             </div>
+
                                         </div>
+
                                     </div>
 
                                 </div>
@@ -263,12 +346,14 @@ export default function Home() {
                                     to="/facilities"
                                     className="group mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-semibold text-slate-950 transition hover:bg-blue-50"
                                 >
+
                                     Explore Facilities
 
                                     <ChevronRight
                                         size={17}
                                         className="transition-transform group-hover:translate-x-0.5"
                                     />
+
                                 </Link>
 
                                 <p className="mt-4 text-center text-xs text-slate-500">
@@ -299,11 +384,13 @@ export default function Home() {
                             to="/sports"
                             className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
                         >
+
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                                 <Trophy size={21} />
                             </div>
 
                             <div className="min-w-0 flex-1">
+
                                 <p className="font-semibold text-slate-900">
                                     Explore Sports
                                 </p>
@@ -311,23 +398,27 @@ export default function Home() {
                                 <p className="mt-1 text-sm text-slate-500">
                                     Discover available activities
                                 </p>
+
                             </div>
 
                             <ArrowRight
                                 size={18}
                                 className="text-slate-300 transition group-hover:translate-x-1 group-hover:text-blue-600"
                             />
+
                         </Link>
 
                         <Link
                             to="/facilities"
                             className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md"
                         >
+
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
                                 <MapPin size={21} />
                             </div>
 
                             <div className="min-w-0 flex-1">
+
                                 <p className="font-semibold text-slate-900">
                                     Browse Facilities
                                 </p>
@@ -335,23 +426,27 @@ export default function Home() {
                                 <p className="mt-1 text-sm text-slate-500">
                                     Find somewhere to play
                                 </p>
+
                             </div>
 
                             <ArrowRight
                                 size={18}
                                 className="text-slate-300 transition group-hover:translate-x-1 group-hover:text-emerald-600"
                             />
+
                         </Link>
 
                         <Link
                             to="/register"
                             className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"
                         >
+
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                                 <Users size={21} />
                             </div>
 
                             <div className="min-w-0 flex-1">
+
                                 <p className="font-semibold text-slate-900">
                                     Become a Member
                                 </p>
@@ -359,12 +454,14 @@ export default function Home() {
                                 <p className="mt-1 text-sm text-slate-500">
                                     Join the sports community
                                 </p>
+
                             </div>
 
                             <ArrowRight
                                 size={18}
                                 className="text-slate-300 transition group-hover:translate-x-1 group-hover:text-indigo-600"
                             />
+
                         </Link>
 
                     </div>
@@ -402,12 +499,14 @@ export default function Home() {
                         to="/sports"
                         className="group inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-slate-900 transition hover:text-blue-600"
                     >
+
                         View all sports
 
                         <ArrowRight
                             size={16}
                             className="transition-transform group-hover:translate-x-1"
                         />
+
                     </Link>
 
                 </div>
@@ -419,10 +518,12 @@ export default function Home() {
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
                             {[1, 2, 3, 4].map((item) => (
+
                                 <div
                                     key={item}
                                     className="h-56 animate-pulse rounded-2xl border border-slate-200 bg-slate-100"
                                 />
+
                             ))}
 
                         </div>
@@ -502,96 +603,7 @@ export default function Home() {
 
             </section>
 
-            {/* =========================================================
-                HOW IT WORKS
-            ========================================================= */}
-
-            <section className="border-y border-slate-100 bg-slate-50">
-
-                <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-
-                    <div className="mx-auto max-w-2xl text-center">
-
-                        <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-                            Simple by design
-                        </p>
-
-                        <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                            Your next game is only a few steps away
-                        </h2>
-
-                        <p className="mt-3 text-base leading-7 text-slate-500">
-                            Everything you need to discover, book and enjoy
-                            community sports.
-                        </p>
-
-                    </div>
-
-                    <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
-
-                        {/* STEP 1 */}
-
-                        <div className="relative text-center">
-
-                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-lg font-bold text-white shadow-lg shadow-blue-600/20">
-                                01
-                            </div>
-
-                            <h3 className="mt-5 text-lg font-bold text-slate-950">
-                                Discover
-                            </h3>
-
-                            <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500">
-                                Browse sports and explore facilities available
-                                in your community.
-                            </p>
-
-                        </div>
-
-                        {/* STEP 2 */}
-
-                        <div className="relative text-center">
-
-                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-lg font-bold text-white shadow-lg shadow-indigo-600/20">
-                                02
-                            </div>
-
-                            <h3 className="mt-5 text-lg font-bold text-slate-950">
-                                Book
-                            </h3>
-
-                            <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500">
-                                Choose a suitable date and time and request
-                                your facility booking.
-                            </p>
-
-                        </div>
-
-                        {/* STEP 3 */}
-
-                        <div className="relative text-center">
-
-                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 text-lg font-bold text-white shadow-lg shadow-violet-600/20">
-                                03
-                            </div>
-
-                            <h3 className="mt-5 text-lg font-bold text-slate-950">
-                                Get active
-                            </h3>
-
-                            <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500">
-                                Enjoy your session, connect with others and
-                                share your experience.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
+           
             {/* =========================================================
                 MEMBER BENEFITS
             ========================================================= */}
@@ -610,12 +622,6 @@ export default function Home() {
                             More than just a booking system
                         </h2>
 
-                        <p className="mt-4 max-w-xl text-base leading-7 text-slate-500">
-                            The platform brings your community's sports
-                            facilities, activities and members together in one
-                            convenient place.
-                        </p>
-
                         <div className="mt-8 space-y-5">
 
                             <div className="flex gap-4">
@@ -625,6 +631,7 @@ export default function Home() {
                                 </div>
 
                                 <div>
+
                                     <h3 className="font-semibold text-slate-900">
                                         Manage your bookings
                                     </h3>
@@ -633,6 +640,7 @@ export default function Home() {
                                         Keep track of your upcoming facility
                                         bookings from your member account.
                                     </p>
+
                                 </div>
 
                             </div>
@@ -644,6 +652,7 @@ export default function Home() {
                                 </div>
 
                                 <div>
+
                                     <h3 className="font-semibold text-slate-900">
                                         A simple member experience
                                     </h3>
@@ -652,6 +661,7 @@ export default function Home() {
                                         Access your sports, bookings and
                                         community activities from one place.
                                     </p>
+
                                 </div>
 
                             </div>
@@ -663,6 +673,7 @@ export default function Home() {
                                 </div>
 
                                 <div>
+
                                     <h3 className="font-semibold text-slate-900">
                                         Be part of the community
                                     </h3>
@@ -671,6 +682,7 @@ export default function Home() {
                                         Join your favourite sports and share
                                         your experience with the community.
                                     </p>
+
                                 </div>
 
                             </div>
@@ -713,13 +725,16 @@ export default function Home() {
                             </Link>
 
                             <p className="mt-4 text-xs text-slate-500">
+
                                 Already a member?{" "}
+
                                 <Link
                                     to="/login"
                                     className="font-semibold text-blue-400 hover:text-blue-300"
                                 >
                                     Sign in
                                 </Link>
+
                             </p>
 
                         </div>
@@ -746,9 +761,7 @@ export default function Home() {
 
                 <div className="relative mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 lg:px-8 lg:py-20">
 
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur">
-                        <Trophy size={27} />
-                    </div>
+                 
 
                     <h2 className="mt-6 text-3xl font-bold tracking-tight text-white sm:text-4xl">
                         Your next game starts here.
@@ -765,9 +778,11 @@ export default function Home() {
                             to="/facilities"
                             className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-blue-600 shadow-lg transition hover:bg-blue-50"
                         >
+
                             Explore Facilities
 
                             <ArrowRight size={17} />
+
                         </Link>
 
                         <Link

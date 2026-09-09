@@ -18,6 +18,10 @@ namespace SportsBooking.API.Controllers
             _context = context;
         }
 
+        // ============================================================
+        // GET: api/Bookings
+        // Admin only - get all bookings.
+        // ============================================================
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<object>>> GetBookings()
@@ -58,6 +62,11 @@ namespace SportsBooking.API.Controllers
             return Ok(bookings);
         }
 
+
+        // ============================================================
+        // GET: api/Bookings/{id}
+        // Authenticated users can view a booking.
+        // ============================================================
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> GetBooking(decimal id)
         {
@@ -104,11 +113,15 @@ namespace SportsBooking.API.Controllers
             return Ok(booking);
         }
 
+
+        // ============================================================
+        // POST: api/Bookings
+        // Members can create bookings.
+        // ============================================================
         [HttpPost]
         public async Task<ActionResult<object>> CreateBooking(
-    BookingCreateRequest request)
+            BookingCreateRequest request)
         {
-
             var memberIdClaim = User.FindFirst(
                 ClaimTypes.NameIdentifier);
 
@@ -180,6 +193,11 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
+
+            // ========================================================
+            // Check whether the member already has an overlapping
+            // booking on the same date.
+            // ========================================================
             var memberBookings = await _context.Bookings
                 .Include(b => b.Facility)
                 .Where(b =>
@@ -221,6 +239,11 @@ namespace SportsBooking.API.Controllers
                 }
             }
 
+
+            // ========================================================
+            // Check whether the facility already has an overlapping
+            // booking on the same date.
+            // ========================================================
             var existingBookings = await _context.Bookings
                 .Where(b =>
                     b.FacilityId == request.FacilityId &&
@@ -260,6 +283,10 @@ namespace SportsBooking.API.Controllers
                 }
             }
 
+
+            // ========================================================
+            // Create booking
+            // ========================================================
             var booking = new Booking
             {
                 MemberId = memberId,
@@ -290,6 +317,16 @@ namespace SportsBooking.API.Controllers
                 });
         }
 
+
+        // ============================================================
+        // PUT: api/Bookings/{id}
+        //
+        // Members can update their own booking details.
+        // Admins can update any booking.
+        //
+        // Members cannot directly change the booking status.
+        // Status changes are handled by Admin confirmation/cancellation.
+        // ============================================================
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBooking(
             decimal id,
@@ -315,6 +352,7 @@ namespace SportsBooking.API.Controllers
             var bookingQuery = _context.Bookings
                 .Where(b => b.BookingId == id);
 
+            // Members can only update their own bookings.
             if (!isAdmin)
             {
                 bookingQuery = bookingQuery
@@ -328,10 +366,31 @@ namespace SportsBooking.API.Controllers
             {
                 return NotFound(new
                 {
-                    message = "Booking does not exist or you do not have permission to modify it."
+                    message =
+                        "Booking does not exist or you do not have permission to modify it."
                 });
             }
 
+
+            // ========================================================
+            // Only Admin can change booking status.
+            // ========================================================
+            string? oldStatus = booking.Status;
+
+            if (!isAdmin &&
+                !string.IsNullOrWhiteSpace(request.Status) &&
+                !string.Equals(
+                    request.Status,
+                    booking.Status,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return Forbid();
+            }
+
+
+            // ========================================================
+            // Validate facility
+            // ========================================================
             var facilityExists = await _context.Facilities
                 .AnyAsync(f => f.FacilityId == request.FacilityId);
 
@@ -343,6 +402,10 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
+
+            // ========================================================
+            // Validate start time
+            // ========================================================
             if (!TimeSpan.TryParse(
                     request.StartTime,
                     out var requestedStart))
@@ -353,6 +416,10 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
+
+            // ========================================================
+            // Validate end time
+            // ========================================================
             if (!TimeSpan.TryParse(
                     request.EndTime,
                     out var requestedEnd))
@@ -363,6 +430,7 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
+
             if (requestedEnd <= requestedStart)
             {
                 return BadRequest(new
@@ -371,6 +439,37 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
+
+            // ========================================================
+            // Validate status if Admin supplied one.
+            // ========================================================
+            if (isAdmin &&
+                !string.IsNullOrWhiteSpace(request.Status))
+            {
+                var requestedStatus = request.Status.Trim();
+
+                if (!requestedStatus.Equals(
+                        "Pending",
+                        StringComparison.OrdinalIgnoreCase) &&
+                    !requestedStatus.Equals(
+                        "Confirmed",
+                        StringComparison.OrdinalIgnoreCase) &&
+                    !requestedStatus.Equals(
+                        "Cancelled",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new
+                    {
+                        message =
+                            "Invalid booking status. Use Pending, Confirmed, or Cancelled."
+                    });
+                }
+            }
+
+
+            // ========================================================
+            // Check facility booking overlap.
+            // ========================================================
             var existingBookings = await _context.Bookings
                 .Where(b =>
                     b.FacilityId == request.FacilityId &&
@@ -403,19 +502,77 @@ namespace SportsBooking.API.Controllers
                 {
                     return BadRequest(new
                     {
-                        message = "The facility is already booked during the selected time."
+                        message =
+                            "The facility is already booked during the selected time."
                     });
                 }
             }
 
+
+            // ========================================================
+            // Update booking details
+            // ========================================================
             booking.FacilityId = request.FacilityId;
             booking.BookingDate = request.BookingDate;
             booking.StartTime = request.StartTime;
             booking.EndTime = request.EndTime;
 
-            if (!string.IsNullOrWhiteSpace(request.Status))
+
+            // ========================================================
+            // Only Admin can update status.
+            // ========================================================
+            if (isAdmin &&
+                !string.IsNullOrWhiteSpace(request.Status))
             {
-                booking.Status = request.Status;
+                booking.Status = request.Status.Trim();
+            }
+
+
+            // ========================================================
+            // Create notification when Admin changes status.
+            // ========================================================
+            if (isAdmin &&
+                !string.Equals(
+                    oldStatus,
+                    booking.Status,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                if (booking.Status.Equals(
+                        "Confirmed",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    var notification = new Notification
+                    {
+                        MemberId = booking.MemberId,
+                        Title = "Booking Confirmed",
+                        Message =
+                            "Your booking has been confirmed by the administrator.",
+                        Type = "Booking",
+                        ReferenceType = "Booking",
+                        ReferenceId = booking.BookingId,
+                        IsRead = false
+                    };
+
+                    _context.Notifications.Add(notification);
+                }
+                else if (booking.Status.Equals(
+                        "Cancelled",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    var notification = new Notification
+                    {
+                        MemberId = booking.MemberId,
+                        Title = "Booking Cancelled",
+                        Message =
+                            "Your booking has been cancelled by the administrator.",
+                        Type = "Booking",
+                        ReferenceType = "Booking",
+                        ReferenceId = booking.BookingId,
+                        IsRead = false
+                    };
+
+                    _context.Notifications.Add(notification);
+                }
             }
 
             await _context.SaveChangesAsync();
@@ -423,6 +580,15 @@ namespace SportsBooking.API.Controllers
             return NoContent();
         }
 
+
+        // ============================================================
+        // PUT: api/Bookings/{id}/confirm
+        //
+        // Admin only.
+        //
+        // Confirms a Pending booking and creates a notification
+        // for the member.
+        // ============================================================
         [HttpPut("{id}/confirm")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ConfirmBooking(decimal id)
@@ -458,7 +624,29 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
+
+            // ========================================================
+            // Confirm booking
+            // ========================================================
             booking.Status = "Confirmed";
+
+
+            // ========================================================
+            // Create notification
+            // ========================================================
+            var notification = new Notification
+            {
+                MemberId = booking.MemberId,
+                Title = "Booking Confirmed",
+                Message =
+                    "Your booking has been confirmed by the administrator.",
+                Type = "Booking",
+                ReferenceType = "Booking",
+                ReferenceId = booking.BookingId,
+                IsRead = false
+            };
+
+            _context.Notifications.Add(notification);
 
             await _context.SaveChangesAsync();
 
@@ -470,6 +658,16 @@ namespace SportsBooking.API.Controllers
             });
         }
 
+
+        // ============================================================
+        // PUT: api/Bookings/{id}/cancel
+        //
+        // Members can cancel their own booking.
+        // Admins can cancel any booking.
+        //
+        // If Admin cancels it, the member receives a notification.
+        // If member cancels their own booking, no notification is sent.
+        // ============================================================
         [HttpPut("{id}/cancel")]
         public async Task<IActionResult> CancelBooking(decimal id)
         {
@@ -506,7 +704,8 @@ namespace SportsBooking.API.Controllers
             {
                 return NotFound(new
                 {
-                    message = "Booking does not exist or you do not have permission to cancel it."
+                    message =
+                        "Booking does not exist or you do not have permission to cancel it."
                 });
             }
 
@@ -520,7 +719,32 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
+
+            // ========================================================
+            // Cancel booking
+            // ========================================================
             booking.Status = "Cancelled";
+
+
+            // ========================================================
+            // Only notify the member when an ADMIN cancels.
+            // ========================================================
+            if (isAdmin)
+            {
+                var notification = new Notification
+                {
+                    MemberId = booking.MemberId,
+                    Title = "Booking Cancelled",
+                    Message =
+                        "Your booking has been cancelled by the administrator.",
+                    Type = "Booking",
+                    ReferenceType = "Booking",
+                    ReferenceId = booking.BookingId,
+                    IsRead = false
+                };
+
+                _context.Notifications.Add(notification);
+            }
 
             await _context.SaveChangesAsync();
 
@@ -532,6 +756,13 @@ namespace SportsBooking.API.Controllers
             });
         }
 
+
+        // ============================================================
+        // DELETE: api/Bookings/{id}
+        //
+        // Members can delete their own booking.
+        // Admins can delete any booking.
+        // ============================================================
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBooking(decimal id)
         {
@@ -568,7 +799,8 @@ namespace SportsBooking.API.Controllers
             {
                 return NotFound(new
                 {
-                    message = "Booking does not exist or you do not have permission to delete it."
+                    message =
+                        "Booking does not exist or you do not have permission to delete it."
                 });
             }
 
@@ -582,13 +814,21 @@ namespace SportsBooking.API.Controllers
             {
                 return Conflict(new
                 {
-                    message = "This booking cannot be permanently deleted because it is referenced by other records. Cancel the booking instead."
+                    message =
+                        "This booking cannot be permanently deleted because it is referenced by other records. Cancel the booking instead."
                 });
             }
 
             return NoContent();
         }
 
+
+        // ============================================================
+        // GET: api/Bookings/availability
+        //
+        // Returns bookings for a facility on a particular date.
+        // Used by the booking page to determine unavailable times.
+        // ============================================================
         [HttpGet("availability")]
         public async Task<ActionResult<object>> GetAvailability(
             decimal facilityId,
@@ -628,6 +868,12 @@ namespace SportsBooking.API.Controllers
             });
         }
 
+
+        // ============================================================
+        // GET: api/Bookings/member/my
+        //
+        // Returns bookings belonging to the currently logged-in member.
+        // ============================================================
         [HttpGet("member/my")]
         public async Task<ActionResult<IEnumerable<object>>> GetMyBookings()
         {
@@ -640,8 +886,8 @@ namespace SportsBooking.API.Controllers
             }
 
             if (!decimal.TryParse(
-                memberIdClaim.Value,
-                out decimal memberId))
+                    memberIdClaim.Value,
+                    out decimal memberId))
             {
                 return Unauthorized();
             }
@@ -675,6 +921,12 @@ namespace SportsBooking.API.Controllers
             return Ok(bookings);
         }
 
+
+        // ============================================================
+        // GET: api/Bookings/facility/{facilityId}
+        //
+        // Returns bookings belonging to a specific facility.
+        // ============================================================
         [HttpGet("facility/{facilityId}")]
         public async Task<ActionResult<IEnumerable<object>>> GetFacilityBookings(
             decimal facilityId)
@@ -726,6 +978,5 @@ namespace SportsBooking.API.Controllers
 
             return Ok(bookings);
         }
-
     }
 }

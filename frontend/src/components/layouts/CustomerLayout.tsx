@@ -1,12 +1,24 @@
 import { Outlet } from "react-router-dom";
 import CustomerNavbar from "../navigation/CustomerNavbar";
+import PublicNavbar from "../navigation/PublicNavbar";
+import { getCurrentMember, isAuthenticated } from "../../services/api";
 
 export default function CustomerLayout() {
+    const member = getCurrentMember();
+
+    const isLoggedInMember =
+        isAuthenticated() &&
+        member?.role?.toLowerCase() === "member";
+
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900">
 
-            {/* Customer Navigation */}
-            <CustomerNavbar />
+            {/* Navigation */}
+            {isLoggedInMember ? (
+                <CustomerNavbar />
+            ) : (
+                <PublicNavbar />
+            )}
 
             {/* Main Application Content */}
             <main className="min-h-[calc(100vh-72px)]">

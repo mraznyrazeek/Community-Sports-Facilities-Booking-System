@@ -11,10 +11,13 @@ import {
 
 import Home from "./pages/Home";
 import Sports from "./pages/Sports";
+import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Facilities from "./pages/Facilities";
 import FacilityDetails from "./pages/FacilityDetails";
 import Inquiries from "./pages/Inquiries";
+import Dashboard from "./pages/Dashboard";
+import Settings from "./pages/Settings";
 
 // ============================================================
 // MEMBER PAGES
@@ -24,6 +27,7 @@ import CreateBooking from "./pages/CreateBooking";
 import ProfilePage from "./pages/ProfilePage";
 import MyBookings from "./pages/MyBookings";
 import MySports from "./pages/MySports";
+import Reviews from "./pages/Reviews";
 
 // ============================================================
 // LAYOUT
@@ -65,13 +69,13 @@ export default function App() {
                 />
 
                 <Route
-                    path="/inquiries"
-                    element={<Inquiries />}
+                    path="/login"
+                    element={<Login />}
                 />
 
                 <Route
-                    path="/login"
-                    element={<Login />}
+                    path="/register"
+                    element={<Register />}
                 />
 
                 {/* ==================================================
@@ -81,6 +85,11 @@ export default function App() {
                 <Route
                     element={<CustomerLayout />}
                 >
+                    <Route
+                        path="/dashboard"
+                        element={<Dashboard />}
+                    />
+
                     <Route
                         path="/profile"
                         element={<ProfilePage />}
@@ -99,6 +108,21 @@ export default function App() {
                     <Route
                         path="/bookings/create"
                         element={<CreateBooking />}
+                    />
+
+                    <Route
+                        path="/reviews"
+                        element={<Reviews />}
+                    />
+
+                    <Route
+                        path="/inquiries"
+                        element={<Inquiries />}
+                    />
+
+                    <Route
+                        path="/settings"
+                        element={<Settings />}
                     />
                 </Route>
 

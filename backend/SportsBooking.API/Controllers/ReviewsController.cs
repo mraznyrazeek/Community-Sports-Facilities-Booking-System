@@ -20,6 +20,7 @@ namespace SportsBooking.API.Controllers
 
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<object>>> GetReviews()
         {
             var reviews = await _context.Reviews
@@ -28,10 +29,13 @@ namespace SportsBooking.API.Controllers
                 .Select(r => new
                 {
                     reviewId = r.ReviewId,
+
                     memberId = r.MemberId,
                     memberName = r.Member.Name,
+
                     facilityId = r.FacilityId,
                     facilityName = r.Facility.FacilityName,
+
                     rating = r.Rating,
                     commentText = r.CommentText,
                     createdAt = r.CreatedAt
@@ -42,8 +46,8 @@ namespace SportsBooking.API.Controllers
             return Ok(reviews);
         }
 
-
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<object>> GetReview(decimal id)
         {
             var review = await _context.Reviews
@@ -53,10 +57,13 @@ namespace SportsBooking.API.Controllers
                 .Select(r => new
                 {
                     reviewId = r.ReviewId,
+
                     memberId = r.MemberId,
                     memberName = r.Member.Name,
+
                     facilityId = r.FacilityId,
                     facilityName = r.Facility.FacilityName,
+
                     rating = r.Rating,
                     commentText = r.CommentText,
                     createdAt = r.CreatedAt
@@ -89,7 +96,6 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
-
             if (request.Rating < 1 || request.Rating > 5)
             {
                 return BadRequest(new
@@ -98,11 +104,11 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
-            var facilityExists = await _context.Facilities
-                .AnyAsync(f =>
+            var facility = await _context.Facilities
+                .FirstOrDefaultAsync(f =>
                     f.FacilityId == request.FacilityId);
 
-            if (!facilityExists)
+            if (facility == null)
             {
                 return BadRequest(new
                 {
@@ -110,22 +116,38 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
-
-            var hasBooking = await _context.Bookings
-                .AnyAsync(b =>
+            var memberBookings = await _context.Bookings
+                .Where(b =>
                     b.MemberId == memberId.Value &&
                     b.FacilityId == request.FacilityId &&
-                    b.Status != "Cancelled");
+                    b.Status != "Cancelled")
+                .ToListAsync();
 
-            if (!hasBooking)
+
+            var now = DateTime.Now;
+
+            var completedBookings = memberBookings
+                .Where(b =>
+                {
+                    var bookingEndText =
+                        $"{b.BookingDate:yyyy-MM-dd} {b.EndTime}";
+
+                    return DateTime.TryParse(
+                        bookingEndText,
+                        out var bookingEnd) &&
+                        bookingEnd <= now;
+                })
+                .ToList();
+
+
+            if (!completedBookings.Any())
             {
                 return BadRequest(new
                 {
                     message =
-                        "You can only review a facility that you have booked."
+                        "You can only review a facility after completing a booking there."
                 });
             }
-
 
             var alreadyReviewed = await _context.Reviews
                 .AnyAsync(r =>
@@ -141,41 +163,82 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
-
             var comment = request.CommentText?.Trim();
 
             if (!string.IsNullOrWhiteSpace(comment) &&
-                comment.Length > 1000)
+                comment.Length > 500)
             {
                 return BadRequest(new
                 {
                     message =
-                        "Comment cannot be longer than 1000 characters."
+                        "Comment cannot be longer than 500 characters."
                 });
             }
-
 
             var review = new Review
             {
                 MemberId = memberId.Value,
                 FacilityId = request.FacilityId,
                 Rating = request.Rating,
-                CommentText = comment,
-                CreatedAt = DateTime.Now
+                CommentText = comment
             };
 
             _context.Reviews.Add(review);
 
             await _context.SaveChangesAsync();
 
+            var completedBookingIds = completedBookings
+                .Select(b => b.BookingId)
+                .ToHashSet();
+
+
+            if (completedBookingIds.Count > 0)
+            {
+                var reviewNotifications =
+                    await _context.Notifications
+                        .Where(n =>
+                            n.MemberId == memberId.Value &&
+                            n.Type == "Review" &&
+                            n.ReferenceType == "Review" &&
+                            n.ReferenceId != null)
+                        .ToListAsync();
+
+
+                var notificationsToRemove =
+                    reviewNotifications
+                        .Where(n =>
+                            n.ReferenceId.HasValue &&
+                            completedBookingIds.Contains(
+                                n.ReferenceId.Value))
+                        .ToList();
+
+
+                if (notificationsToRemove.Any())
+                {
+                    _context.Notifications.RemoveRange(
+                        notificationsToRemove);
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+
             return CreatedAtAction(
                 nameof(GetReview),
-                new { id = review.ReviewId },
+                new
+                {
+                    id = review.ReviewId
+                },
                 new
                 {
                     reviewId = review.ReviewId,
+
                     memberId = review.MemberId,
+                    memberName = facility.FacilityName,
+
                     facilityId = review.FacilityId,
+                    facilityName = facility.FacilityName,
+
                     rating = review.Rating,
                     commentText = review.CommentText,
                     createdAt = review.CreatedAt
@@ -234,12 +297,12 @@ namespace SportsBooking.API.Controllers
             var comment = request.CommentText?.Trim();
 
             if (!string.IsNullOrWhiteSpace(comment) &&
-                comment.Length > 1000)
+                comment.Length > 500)
             {
                 return BadRequest(new
                 {
                     message =
-                        "Comment cannot be longer than 1000 characters."
+                        "Comment cannot be longer than 500 characters."
                 });
             }
 
@@ -247,10 +310,13 @@ namespace SportsBooking.API.Controllers
             review.Rating = request.Rating;
             review.CommentText = comment;
 
+            // CreatedAt remains unchanged.
+
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(
@@ -266,6 +332,7 @@ namespace SportsBooking.API.Controllers
                 });
             }
 
+
             var review = await _context.Reviews
                 .FirstOrDefaultAsync(r =>
                     r.ReviewId == id);
@@ -277,6 +344,7 @@ namespace SportsBooking.API.Controllers
                     message = "Review not found."
                 });
             }
+
 
             var isAdmin = User.IsInRole("Admin");
 
@@ -296,6 +364,7 @@ namespace SportsBooking.API.Controllers
 
 
         [HttpGet("facility/{facilityId}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<object>>>
             GetFacilityReviews(decimal facilityId)
         {
@@ -320,9 +389,12 @@ namespace SportsBooking.API.Controllers
                 .Select(r => new
                 {
                     reviewId = r.ReviewId,
+
                     memberId = r.MemberId,
                     memberName = r.Member.Name,
+
                     facilityId = r.FacilityId,
+
                     rating = r.Rating,
                     commentText = r.CommentText,
                     createdAt = r.CreatedAt
@@ -331,6 +403,7 @@ namespace SportsBooking.API.Controllers
 
             return Ok(reviews);
         }
+
 
         [HttpGet("member/my")]
         public async Task<ActionResult<IEnumerable<object>>>
@@ -355,8 +428,10 @@ namespace SportsBooking.API.Controllers
                 .Select(r => new
                 {
                     reviewId = r.ReviewId,
+
                     facilityId = r.FacilityId,
                     facilityName = r.Facility.FacilityName,
+
                     rating = r.Rating,
                     commentText = r.CommentText,
                     createdAt = r.CreatedAt
@@ -365,6 +440,81 @@ namespace SportsBooking.API.Controllers
 
             return Ok(reviews);
         }
+
+
+        [HttpGet("member/reviewable")]
+        public async Task<ActionResult<IEnumerable<object>>>
+            GetReviewableBookings()
+        {
+            var memberId = GetCurrentMemberId();
+
+            if (memberId == null)
+            {
+                return Unauthorized(new
+                {
+                    message = "Member identity could not be determined."
+                });
+            }
+
+
+            var now = DateTime.Now;
+
+            var memberBookings = await _context.Bookings
+                .Include(b => b.Facility)
+                .Where(b =>
+                    b.MemberId == memberId.Value &&
+                    b.Status != "Cancelled")
+                .OrderByDescending(b => b.BookingDate)
+                .ThenByDescending(b => b.StartTime)
+                .ToListAsync();
+
+
+            var reviewableBookings = memberBookings
+                .Where(b =>
+                {
+                    var bookingEndText =
+                        $"{b.BookingDate:yyyy-MM-dd} {b.EndTime}";
+
+                    return DateTime.TryParse(
+                        bookingEndText,
+                        out var bookingEnd) &&
+                        bookingEnd <= now;
+                })
+                .Select(b => new
+                {
+                    bookingId = b.BookingId,
+
+                    facilityId = b.FacilityId,
+                    facilityName = b.Facility.FacilityName,
+                    location = b.Facility.Location,
+
+                    bookingDate = b.BookingDate,
+                    startTime = b.StartTime,
+                    endTime = b.EndTime,
+
+                    bookingStatus = b.Status,
+
+
+                    review = _context.Reviews
+                        .Where(r =>
+                            r.MemberId == memberId.Value &&
+                            r.FacilityId == b.FacilityId)
+                        .Select(r => new
+                        {
+                            reviewId = r.ReviewId,
+
+                            rating = r.Rating,
+                            commentText = r.CommentText,
+                            createdAt = r.CreatedAt
+                        })
+                        .FirstOrDefault()
+                })
+                .ToList();
+
+
+            return Ok(reviewableBookings);
+        }
+
 
         private decimal? GetCurrentMemberId()
         {
@@ -381,21 +531,22 @@ namespace SportsBooking.API.Controllers
 
             return null;
         }
-    }
 
-    public class CreateReviewRequest
-    {
-        public decimal FacilityId { get; set; }
+        public class CreateReviewRequest
+        {
+            public decimal FacilityId { get; set; }
 
-        public decimal Rating { get; set; }
+            public decimal Rating { get; set; }
 
-        public string? CommentText { get; set; }
-    }
+            public string? CommentText { get; set; }
+        }
 
-    public class UpdateReviewRequest
-    {
-        public decimal Rating { get; set; }
 
-        public string? CommentText { get; set; }
+        public class UpdateReviewRequest
+        {
+            public decimal Rating { get; set; }
+
+            public string? CommentText { get; set; }
+        }
     }
 }

@@ -37,7 +37,7 @@ export default function PublicNavbar() {
             path: "/reviews",
         },
         {
-            label: "Contact",
+            label: "Inquiries",
             path: "/inquiries",
         },
     ];
