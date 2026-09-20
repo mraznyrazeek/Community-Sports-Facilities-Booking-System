@@ -948,9 +948,7 @@ export default function Facilities() {
 
                                                 </div>
 
-                                                {/* ==================================================
-                                                    FOOTER
-                                                ================================================== */}
+                                                {/* FOOTER */}
 
                                                 <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-5">
 
@@ -987,9 +985,7 @@ export default function Facilities() {
 
             </main>
 
-            {/* ==================================================
-                BOTTOM CTA
-            ================================================== */}
+            {/* BOTTOM CTA */}
 
             {!loading &&
                 !error &&
@@ -1033,9 +1029,7 @@ export default function Facilities() {
                     </section>
                 )}
 
-            {/* ==================================================
-                REVIEWS MODAL
-            ================================================== */}
+            {/* REVIEWS MODAL */}
 
             {selectedFacility && (
                 <div
@@ -1052,9 +1046,7 @@ export default function Facilities() {
 
                     <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
 
-                        {/* ==================================================
-                            MODAL HEADER
-                        ================================================== */}
+                        {/* MODAL HEADER */}
 
                         <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5 sm:px-7">
 
@@ -1126,9 +1118,7 @@ export default function Facilities() {
 
                         </div>
 
-                        {/* ==================================================
-                            MODAL CONTENT
-                        ================================================== */}
+                        {/* MODAL CONTENT */}
 
                         <div className="overflow-y-auto px-6 py-6 sm:px-7">
 
@@ -1266,9 +1256,7 @@ export default function Facilities() {
 
                         </div>
 
-                        {/* ==================================================
-                            MODAL FOOTER
-                        ================================================== */}
+                        {/* MODAL FOOTER */}
 
                         <div className="border-t border-slate-100 bg-slate-50 px-6 py-4 sm:px-7">
 

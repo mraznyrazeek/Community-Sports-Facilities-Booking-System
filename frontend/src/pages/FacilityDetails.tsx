@@ -238,17 +238,13 @@ export default function FacilityDetails() {
     return (
         <div className="min-h-screen bg-slate-50">
 
-            {/* ================================================================
-                NAVBAR
-            ================================================================ */}
+            {/* NAVBAR */}
 
             <Navbar />
 
             <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
 
-                {/* ============================================================
-                    BACK NAVIGATION
-                ============================================================ */}
+                {/* BACK NAVIGATION */}
 
                 <div className="mb-6">
                     <Link
@@ -264,15 +260,11 @@ export default function FacilityDetails() {
                     </Link>
                 </div>
 
-                {/* ============================================================
-                    MAIN CARD
-                ============================================================ */}
+                {/* MAIN CARD */}
 
                 <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
-                    {/* ========================================================
-                        HERO
-                    ======================================================== */}
+                    {/* HERO */}
 
                     <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700">
 
@@ -351,17 +343,13 @@ export default function FacilityDetails() {
                         </div>
                     </section>
 
-                    {/* ========================================================
-                        CONTENT
-                    ======================================================== */}
+                    {/* CONTENT */}
 
                     <div className="p-6 sm:p-8 lg:p-10">
 
                         <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
 
-                            {/* ==================================================
-                                LEFT CONTENT
-                            ================================================== */}
+                            {/* LEFT CONTENT */}
 
                             <div className="lg:col-span-2">
 
@@ -382,9 +370,7 @@ export default function FacilityDetails() {
                                     </p>
                                 </div>
 
-                                {/* ==================================================
-                                    INFORMATION CARDS
-                                ================================================== */}
+                                {/* INFORMATION CARDS */}
 
                                 <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
 
@@ -446,9 +432,7 @@ export default function FacilityDetails() {
                                     </div>
                                 </div>
 
-                                {/* ==================================================
-                                    ADDRESS
-                                ================================================== */}
+                                {/* ADDRESS */}
 
                                 {facility.address && (
                                     <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5">
@@ -474,9 +458,7 @@ export default function FacilityDetails() {
                                     </div>
                                 )}
 
-                                {/* ==================================================
-                                    MOBILE OPENING HOURS
-                                ================================================== */}
+                                {/* MOBILE OPENING HOURS*/}
 
                                 <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-6 lg:hidden">
 
@@ -507,9 +489,7 @@ export default function FacilityDetails() {
                                 </div>
                             </div>
 
-                            {/* ==================================================
-                                BOOKING SIDEBAR
-                            ================================================== */}
+                            {/*  BOOKING SIDEBAR */}
 
                             <aside>
 
@@ -618,9 +598,7 @@ export default function FacilityDetails() {
                     </div>
                 </div>
 
-                {/* ============================================================
-                    BOTTOM NAVIGATION
-                ============================================================ */}
+                {/* BOTTOM NAVIGATION */}
 
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 

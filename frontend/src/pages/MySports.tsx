@@ -11,11 +11,6 @@ import {
     removeMySport,
 } from "../services/api";
 
-
-// ============================================================
-// TYPES
-// ============================================================
-
 interface Sport {
     sportId: number;
     sportName: string;
@@ -29,11 +24,6 @@ interface MemberSport {
     sport: Sport | null;
 }
 
-
-// ============================================================
-// PAGE
-// ============================================================
-
 export default function MySports() {
 
     const [sports, setSports] = useState<MemberSport[]>([]);
@@ -43,10 +33,6 @@ export default function MySports() {
     const [removingSportId, setRemovingSportId] =
         useState<number | null>(null);
 
-
-    // ========================================================
-    // LOAD MEMBER SPORTS
-    // ========================================================
 
     useEffect(() => {
 
@@ -83,11 +69,6 @@ export default function MySports() {
         loadMySports();
 
     }, []);
-
-
-    // ========================================================
-    // REMOVE SPORT
-    // ========================================================
 
     const handleRemoveSport = async (
         sportId: number
@@ -130,16 +111,8 @@ export default function MySports() {
     };
 
 
-    // ========================================================
-    // PAGE UI
-    // ========================================================
-
     return (
         <div className="min-h-screen bg-slate-50">
-
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <section className="border-b border-slate-200 bg-white">
                 <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -155,17 +128,7 @@ export default function MySports() {
                 </div>
             </section>
 
-
-            {/* =================================================
-                CONTENT
-            ================================================= */}
-
             <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-
-
-                {/* =================================================
-                    ERROR
-                ================================================= */}
 
                 {error && (
 
@@ -176,11 +139,6 @@ export default function MySports() {
                     </div>
 
                 )}
-
-
-                {/* =================================================
-                    LOADING
-                ================================================= */}
 
                 {loading && (
 
@@ -199,10 +157,6 @@ export default function MySports() {
 
                 )}
 
-
-                {/* =================================================
-                    NO SPORTS
-                ================================================= */}
 
                 {!loading &&
                     sports.length === 0 &&
@@ -236,11 +190,6 @@ export default function MySports() {
                         </div>
 
                     )}
-
-
-                {/* =================================================
-                    SPORTS LIST
-                ================================================= */}
 
                 {!loading &&
                     sports.length > 0 && (

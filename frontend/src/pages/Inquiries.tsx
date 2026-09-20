@@ -144,11 +144,6 @@ export default function Inquiries() {
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-
-  // ============================================================
-  // LOAD MEMBER INQUIRIES
-  // ============================================================
-
   const loadInquiries = async () => {
     if (!isLoggedInMember) return;
 
@@ -186,19 +181,10 @@ export default function Inquiries() {
     }
   };
 
-
-  // ============================================================
-  // INITIAL LOAD
-  // ============================================================
-
   useEffect(() => {
     loadInquiries();
   }, [isLoggedInMember]);
 
-
-  // ============================================================
-  // OPEN INQUIRY
-  // ============================================================
 
   const openInquiry = async (id: number) => {
     try {
@@ -220,10 +206,6 @@ export default function Inquiries() {
     }
   };
 
-
-  // ============================================================
-  // CREATE NEW INQUIRY
-  // ============================================================
 
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
@@ -272,11 +254,6 @@ export default function Inquiries() {
       setSubmitting(false);
     }
   };
-
-
-  // ============================================================
-  // SEND REPLY
-  // ============================================================
 
   const handleReply = async (
     event: FormEvent<HTMLFormElement>
@@ -328,10 +305,6 @@ export default function Inquiries() {
     }
   };
 
-
-  // ============================================================
-  // CONVERSATION
-  // ============================================================
 
   const conversation = useMemo(() => {
     if (!selectedInquiry) return [];
@@ -389,11 +362,6 @@ export default function Inquiries() {
     return messages;
   }, [selectedInquiry]);
 
-
-  // ============================================================
-  // LOGGED OUT / NON-MEMBER VIEW
-  // ============================================================
-
  if (!isLoggedInMember) {
     return (
         <div className="min-h-screen bg-slate-50">
@@ -426,17 +394,11 @@ export default function Inquiries() {
     );
 }
 
-  // ============================================================
-  // MEMBER VIEW
-  // ============================================================
 
   return (
     <div className="min-h-screen bg-slate-50">
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* =====================================================
-            PAGE HEADER
-        ====================================================== */}
 
         <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -467,10 +429,6 @@ export default function Inquiries() {
         </div>
 
 
-        {/* =====================================================
-            ERROR
-        ====================================================== */}
-
         {error && (
           <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <AlertCircle
@@ -491,10 +449,6 @@ export default function Inquiries() {
         )}
 
 
-        {/* =====================================================
-            SUCCESS
-        ====================================================== */}
-
         {success && !showSuccessModal && (
           <div className="mb-5 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             <CheckCircle2 size={18} />
@@ -511,16 +465,10 @@ export default function Inquiries() {
         )}
 
 
-        {/* =====================================================
-            MAIN CONTENT
-        ====================================================== */}
+        {/* CONTENT */}
 
         <div className="grid min-h-[650px] grid-cols-1 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm lg:grid-cols-[340px_1fr]">
 
-
-          {/* ===================================================
-              LEFT - MY INQUIRIES
-          ==================================================== */}
 
           <aside className="border-b border-slate-200 bg-slate-50 lg:border-b-0 lg:border-r">
             <div className="border-b border-slate-200 px-5 py-5">
@@ -672,15 +620,9 @@ export default function Inquiries() {
           </aside>
 
 
-          {/* ===================================================
-              RIGHT - CONTENT
-          ==================================================== */}
-
           <section className="flex min-h-[650px] flex-col bg-white">
 
-            {/* =================================================
-                NEW INQUIRY FORM
-            ================================================== */}
+            {/* NEW INQUIRY FORM */}
 
             {showNewInquiry ? (
               <>
@@ -856,10 +798,6 @@ export default function Inquiries() {
                 </form>
               </>
             ) : selectedInquiry ? (
-
-              /* =================================================
-                 SELECTED INQUIRY / CONVERSATION
-              ================================================== */
 
               <>
                 {/* Conversation header */}
@@ -1071,9 +1009,7 @@ export default function Inquiries() {
               </>
             ) : (
 
-              /* =================================================
-                 EMPTY STATE
-              ================================================== */
+              /* EMPTY STATE */
 
               <div className="flex flex-1 items-center justify-center px-6 py-16">
                 <div className="max-w-md text-center">
@@ -1109,9 +1045,7 @@ export default function Inquiries() {
       </main>
 
 
-      {/* ========================================================
-          SUCCESS MODAL
-      ========================================================= */}
+      {/* SUCCESS MODAL */}
 
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm">

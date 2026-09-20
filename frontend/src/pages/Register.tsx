@@ -29,9 +29,6 @@ export default function Register() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // ============================================================
-    // PASSWORD VALIDATION
-    // ============================================================
 
     const hasMinimumLength = password.length >= 8;
     const hasUppercase = /[A-Z]/.test(password);
@@ -44,10 +41,6 @@ export default function Register() {
         password.length > 0 &&
         confirmPassword.length > 0 &&
         password === confirmPassword;
-
-    // ============================================================
-    // SUBMIT
-    // ============================================================
 
     const handleSubmit = async (
         event: FormEvent<HTMLFormElement>
@@ -114,10 +107,6 @@ export default function Register() {
     return (
         <div className="min-h-screen bg-slate-50">
 
-            {/* =====================================================
-                BACKGROUND
-            ===================================================== */}
-
             <div className="relative min-h-screen overflow-hidden">
 
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50" />
@@ -126,18 +115,10 @@ export default function Register() {
 
                 <div className="absolute -bottom-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-indigo-200/30 blur-3xl" />
 
-
-                {/* =================================================
-                    CONTENT
-                ================================================= */}
-
                 <div className="relative mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
 
                     <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-300/30 lg:grid-cols-2">
 
-                        {/* =================================================
-                            BRAND PANEL
-                        ================================================= */}
 
                         <div className="relative hidden overflow-hidden bg-slate-950 p-10 lg:flex lg:flex-col lg:justify-between">
 
@@ -227,10 +208,6 @@ export default function Register() {
                         </div>
 
 
-                        {/* =================================================
-                            REGISTER FORM
-                        ================================================= */}
-
                         <div className="p-6 sm:p-10 lg:p-12">
 
                             {/* Mobile brand */}
@@ -285,10 +262,6 @@ export default function Register() {
                                     </div>
                                 )}
 
-
-                                {/* =================================================
-                                    FORM
-                                ================================================= */}
 
                                 <form
                                     onSubmit={handleSubmit}
@@ -399,11 +372,6 @@ export default function Register() {
 
                                     </div>
 
-
-                                    {/* =================================================
-                                        PASSWORD
-                                    ================================================= */}
-
                                     <div>
 
                                         <label
@@ -508,11 +476,6 @@ export default function Register() {
 
                                     </div>
 
-
-                                    {/* =================================================
-                                        CONFIRM PASSWORD
-                                    ================================================= */}
-
                                     <div>
 
                                         <label
@@ -607,11 +570,6 @@ export default function Register() {
                                         )}
 
                                     </div>
-
-
-                                    {/* =================================================
-                                        SUBMIT
-                                    ================================================= */}
 
                                     <button
                                         type="submit"

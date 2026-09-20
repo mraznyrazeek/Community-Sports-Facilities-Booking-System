@@ -45,15 +45,11 @@ export default function PublicNavbar() {
     return (
         <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
 
-            {/* =====================================================
-                MAIN NAVBAR
-            ===================================================== */}
+            {/* MAIN NAVBAR*/}
 
             <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
-                {/* =================================================
-                    LOGO
-                ================================================= */}
+                {/* LOGO */}
 
                 <Link
                     to="/"
@@ -81,9 +77,7 @@ export default function PublicNavbar() {
                 </Link>
 
 
-                {/* =================================================
-                    DESKTOP NAVIGATION
-                ================================================= */}
+                {/* DESKTOP NAVIGATION*/}
 
                 <nav className="hidden items-center gap-1 md:flex">
 
@@ -109,9 +103,7 @@ export default function PublicNavbar() {
                 </nav>
 
 
-                {/* =================================================
-                    PUBLIC ACTIONS
-                ================================================= */}
+                {/* PUBLIC ACTIONS */}
 
                 <div className="hidden items-center gap-2 md:flex">
 
@@ -137,9 +129,7 @@ export default function PublicNavbar() {
                 </div>
 
 
-                {/* =================================================
-                    MOBILE MENU
-                ================================================= */}
+                {/* MOBILE MENU */}
 
                 <button
                     type="button"
@@ -166,9 +156,7 @@ export default function PublicNavbar() {
             </div>
 
 
-            {/* =====================================================
-                MOBILE NAVIGATION
-            ===================================================== */}
+            {/* MOBILE NAVIGATION */}
 
             {mobileOpen && (
 

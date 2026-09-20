@@ -1,7 +1,0 @@
-<?xml version = '1.0' encoding = 'UTF-8'?>
-<LogicalDesign class="oracle.dbtools.crest.model.design.logical.LogicalDesign" name="Logical" id="1EC56380-4FFC-CC64-FA56-BE26AE0A80BD" mainViewID="E973DEDC-3251-1758-D2BC-2B4D4A4DA0B4">
-<createdBy>Razny Razeek</createdBy>
-<createdTime>2026-08-23 10:58:11 UTC</createdTime>
-<ownerDesignName>Sports_Booking_System_Data_Modele</ownerDesignName>
-<shouldBeOpen>false</shouldBeOpen>
-</LogicalDesign>

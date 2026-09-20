@@ -21,9 +21,6 @@ export default function ProfilePage() {
     return (
         <div className="min-h-screen bg-slate-50">
 
-            {/* =====================================================
-                    PAGE HEADER
-                ===================================================== */}
             <section className="border-b border-slate-200 bg-white">
                 <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
@@ -38,18 +35,10 @@ export default function ProfilePage() {
                 </div>
             </section>
 
-            {/* =====================================================
-                PROFILE CONTENT
-            ===================================================== */}
-
             <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
-
-                    {/* =================================================
-                        MY BOOKINGS
-                    ================================================= */}
 
                     <Link
                         to="/profile/bookings"
@@ -77,11 +66,6 @@ export default function ProfilePage() {
                         </div>
 
                     </Link>
-
-
-                    {/* =================================================
-                        REGISTERED SPORTS
-                    ================================================= */}
 
                     <Link
                         to="/profile/sports"
@@ -111,10 +95,6 @@ export default function ProfilePage() {
                     </Link>
 
 
-                    {/* =================================================
-                        MY REVIEWS
-                    ================================================= */}
-
                     <Link
                         to="/profile/reviews"
                         className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-purple-200 hover:shadow-md"
@@ -141,11 +121,6 @@ export default function ProfilePage() {
                         </div>
 
                     </Link>
-
-
-                    {/* =================================================
-                        MY INQUIRIES
-                    ================================================= */}
 
                     <Link
                         to="/profile/inquiries"
@@ -175,11 +150,6 @@ export default function ProfilePage() {
                     </Link>
 
                 </div>
-
-
-                {/* =====================================================
-                    ACCOUNT INFORMATION
-                ===================================================== */}
 
                 <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 

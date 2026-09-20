@@ -31,20 +31,14 @@ export default function Home() {
     const [sports, setSports] = useState<Sport[]>([]);
     const [loadingSports, setLoadingSports] = useState(true);
 
-    // ============================================================
     // CURRENT MEMBER / NAVBAR
-    // ============================================================
-
     const member = getCurrentMember();
 
     const isLoggedInMember =
         !!localStorage.getItem("token") &&
         member?.role?.toLowerCase() === "member";
 
-    // ============================================================
     // LOAD SPORTS
-    // ============================================================
-
     useEffect(() => {
         const loadSports = async () => {
             try {
@@ -70,9 +64,7 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-white text-slate-900">
 
-            {/* =========================================================
-                NAVBAR
-            ========================================================= */}
+            {/* NAVBAR*/}
 
             {isLoggedInMember ? (
                 <CustomerNavbar />
@@ -80,9 +72,7 @@ export default function Home() {
                 <PublicNavbar />
             )}
 
-            {/* =========================================================
-                HERO
-            ========================================================= */}
+            {/* HERO */}
 
             <section className="relative overflow-hidden bg-slate-950">
 
@@ -111,9 +101,7 @@ export default function Home() {
 
                     <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
 
-                        {/* =================================================
-                            LEFT
-                        ================================================= */}
+                        {/* LEFT */}
 
                         <div>
 
@@ -198,9 +186,7 @@ export default function Home() {
 
                         </div>
 
-                        {/* =================================================
-                            RIGHT - SEARCH CARD
-                        ================================================= */}
+                        {/*  RIGHT - SEARCH CARD */}
 
                         <div className="relative">
 
@@ -370,9 +356,7 @@ export default function Home() {
 
             </section>
 
-            {/* =========================================================
-                QUICK DISCOVERY
-            ========================================================= */}
+            {/* QUICK DISCOVERY*/}
 
             <section className="border-b border-slate-100 bg-slate-50">
 
@@ -470,9 +454,7 @@ export default function Home() {
 
             </section>
 
-            {/* =========================================================
-                SPORTS
-            ========================================================= */}
+            {/* SPORTS */}
 
             <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
 
@@ -604,9 +586,7 @@ export default function Home() {
             </section>
 
            
-            {/* =========================================================
-                MEMBER BENEFITS
-            ========================================================= */}
+            {/* MEMBER BENEFITS */}
 
             <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
 
@@ -745,9 +725,7 @@ export default function Home() {
 
             </section>
 
-            {/* =========================================================
-                FINAL CTA
-            ========================================================= */}
+            {/* FINAL CTA */}
 
             <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600">
 

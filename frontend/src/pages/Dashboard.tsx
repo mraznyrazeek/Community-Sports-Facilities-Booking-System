@@ -772,9 +772,7 @@ export default function Dashboard() {
                     </div>
 
 
-                    {/* =================================================
-                        MY SPORTS
-                    ================================================= */}
+                    {/* MY SPORTS */}
 
                     <div className="rounded-3xl border border-slate-200 bg-white shadow-sm">
 
@@ -912,9 +910,7 @@ export default function Dashboard() {
 }
 
 
-/* ================================================================
-   DASHBOARD QUICK ACCESS CARD
-================================================================ */
+/* DASHBOARD QUICK ACCESS CARD*/
 
 function DashboardLink({
     to,

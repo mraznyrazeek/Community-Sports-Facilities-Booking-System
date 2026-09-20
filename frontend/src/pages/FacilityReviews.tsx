@@ -35,9 +35,7 @@ export default function FacilityReviews({
     facilityId,
 }: FacilityReviewsProps) {
 
-    // =========================================================
     // STATE
-    // =========================================================
 
     const [reviews, setReviews] = useState<Review[]>([]);
     const [myReview, setMyReview] = useState<Review | null>(null);
@@ -54,10 +52,7 @@ export default function FacilityReviews({
 
     const [editing, setEditing] = useState(false);
 
-    // =========================================================
     // LOAD REVIEWS
-    // =========================================================
-
     const loadReviews = async () => {
         try {
             setLoading(true);
@@ -100,10 +95,7 @@ export default function FacilityReviews({
         loadReviews();
     }, [facilityId]);
 
-    // =========================================================
     // RATING SUMMARY
-    // =========================================================
-
     const averageRating = useMemo(() => {
         if (reviews.length === 0) {
             return 0;
@@ -118,10 +110,7 @@ export default function FacilityReviews({
         return total / reviews.length;
     }, [reviews]);
 
-    // =========================================================
     // FORMAT DATE
-    // =========================================================
-
     const formatDate = (date?: string) => {
         if (!date) {
             return "";
@@ -143,10 +132,7 @@ export default function FacilityReviews({
         );
     };
 
-    // =========================================================
     // RESET FORM
-    // =========================================================
-
     const resetForm = () => {
         setRating(0);
         setHoverRating(0);
@@ -154,9 +140,7 @@ export default function FacilityReviews({
         setEditing(false);
     };
 
-    // =========================================================
     // START EDITING
-    // =========================================================
 
     const startEditing = () => {
         if (!myReview) {
@@ -178,10 +162,7 @@ export default function FacilityReviews({
         });
     };
 
-    // =========================================================
     // SUBMIT REVIEW
-    // =========================================================
-
     const handleSubmit = async (
         event: React.FormEvent<HTMLFormElement>
     ) => {
@@ -249,10 +230,7 @@ export default function FacilityReviews({
         }
     };
 
-    // =========================================================
     // DELETE REVIEW
-    // =========================================================
-
     const handleDelete = async () => {
         if (!myReview) {
             return;
@@ -296,10 +274,7 @@ export default function FacilityReviews({
         }
     };
 
-    // =========================================================
     // LOADING
-    // =========================================================
-
     if (loading) {
         return (
             <section className="mt-10">
@@ -321,18 +296,13 @@ export default function FacilityReviews({
         );
     }
 
-    // =========================================================
     // UI
-    // =========================================================
-
     return (
         <section className="mt-10">
 
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
 
-                {/* =================================================
-                    HEADER
-                ================================================= */}
+                {/* HEADER */}
 
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
 
@@ -393,9 +363,7 @@ export default function FacilityReviews({
                 </div>
 
 
-                {/* =================================================
-                    ALERTS
-                ================================================= */}
+                {/* ALERTS */}
 
                 {error && (
                     <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4">
@@ -424,9 +392,7 @@ export default function FacilityReviews({
                 )}
 
 
-                {/* =================================================
-                    REVIEW LIST
-                ================================================= */}
+                {/* REVIEW LIST= */}
 
                 <div className="mt-8">
 
@@ -565,9 +531,7 @@ export default function FacilityReviews({
                 </div>
 
 
-                {/* =================================================
-                    REVIEW FORM
-                ================================================= */}
+                {/* REVIEW FORM */}
 
                 {!myReview || editing ? (
 

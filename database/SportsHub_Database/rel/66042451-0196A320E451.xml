@@ -1,0 +1,8 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<relationalModel class="oracle.dbtools.crest.model.design.relational.RelationalDesign" name="Relational_1" id="66042451-E773-6323-BA9A-0196A320E451" mainViewID="3209DA84-5DA2-D3CD-82B9-EE2D061E7481">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-09-20 16:57:35 UTC</createdTime>
+<ownerDesignName>SportsHub_Database</ownerDesignName>
+<shouldBeOpen>false</shouldBeOpen>
+<selectedRDBMSSite>32076570-2523-435C-2E92-BF29817DFF70</selectedRDBMSSite>
+</relationalModel>

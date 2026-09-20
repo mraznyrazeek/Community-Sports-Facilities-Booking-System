@@ -1,0 +1,7 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<LogicalDesign class="oracle.dbtools.crest.model.design.logical.LogicalDesign" name="Logical" id="0A957BF4-74B9-F5CE-EFEC-9954450B02C0" mainViewID="799D17FE-33CD-41FA-F7D3-8C399D336CCD">
+<createdBy>Razny Razeek</createdBy>
+<createdTime>2026-09-20 16:57:26 UTC</createdTime>
+<ownerDesignName>SportsHub_Database</ownerDesignName>
+<shouldBeOpen>false</shouldBeOpen>
+</LogicalDesign>

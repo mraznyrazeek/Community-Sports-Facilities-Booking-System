@@ -649,10 +649,6 @@ export default function MyBookings() {
         <div className="min-h-screen bg-slate-50">
 
 
-            {/* ==================================================
-    PAGE HEADER
-================================================== */}
-
             <section className="border-b border-slate-200 bg-white">
                 <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
@@ -667,19 +663,9 @@ export default function MyBookings() {
                 </div>
             </section>
 
-
-            {/* =====================================================
-                PAGE CONTENT
-            ===================================================== */}
-
             <main className="bg-slate-50">
 
                 <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-
-
-                    {/* ==================================================
-                        ERROR
-                    ================================================== */}
 
                     {error && (
 
@@ -697,11 +683,6 @@ export default function MyBookings() {
                         </div>
 
                     )}
-
-
-                    {/* ==================================================
-                        FILTERS
-                    ================================================== */}
 
                     <div className="flex flex-wrap gap-2">
 
@@ -724,8 +705,8 @@ export default function MyBookings() {
                                         )
                                     }
                                     className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${filter === item
-                                            ? "bg-blue-600 text-white shadow-sm"
-                                            : "bg-white text-slate-600 hover:bg-slate-100"
+                                        ? "bg-blue-600 text-white shadow-sm"
+                                        : "bg-white text-slate-600 hover:bg-slate-100"
                                         }`}
                                 >
                                     {item}
@@ -736,10 +717,6 @@ export default function MyBookings() {
 
                     </div>
 
-
-                    {/* ==================================================
-                        EMPTY
-                    ================================================== */}
 
                     {filteredBookings.length ===
                         0 && (
@@ -784,10 +761,6 @@ export default function MyBookings() {
                         )}
 
 
-                    {/* ==================================================
-                        BOOKINGS
-                    ================================================== */}
-
                     {paginatedBookings.length >
                         0 && (
 
@@ -804,11 +777,6 @@ export default function MyBookings() {
                                         >
 
                                             <div className="p-6 sm:p-7">
-
-
-                                                {/* ==========================================
-                                                TOP
-                                            ========================================== */}
 
                                                 <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
 
@@ -872,10 +840,6 @@ export default function MyBookings() {
 
                                                 </div>
 
-
-                                                {/* ==========================================
-                                                DETAILS
-                                            ========================================== */}
 
                                                 <div className="mt-6 grid grid-cols-1 gap-4 border-t border-slate-100 pt-5 sm:grid-cols-3">
 
@@ -976,10 +940,6 @@ export default function MyBookings() {
                                                 </div>
 
 
-                                                {/* ==========================================
-                                                ACTIONS
-                                            ========================================== */}
-
                                                 <div className="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
 
                                                     <Link
@@ -1039,11 +999,6 @@ export default function MyBookings() {
                             </div>
 
                         )}
-
-
-                    {/* ==================================================
-                        PAGINATION
-                    ================================================== */}
 
                     {filteredBookings.length >
                         BOOKINGS_PER_PAGE && (
@@ -1174,11 +1129,6 @@ export default function MyBookings() {
 
             </main>
 
-
-            {/* ======================================================
-                CANCEL CONFIRMATION MODAL
-            ====================================================== */}
-
             {bookingToCancel && (
 
                 <div
@@ -1199,10 +1149,6 @@ export default function MyBookings() {
 
                     <div className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
 
-
-                        {/* ==========================================
-                            MODAL HEADER
-                        ========================================== */}
 
                         <div className="flex items-start justify-between px-6 pb-2 pt-6">
 
@@ -1233,10 +1179,6 @@ export default function MyBookings() {
 
                         </div>
 
-
-                        {/* ==========================================
-                            CONTENT
-                        ========================================== */}
 
                         <div className="px-6 pb-6 pt-3">
 
@@ -1340,11 +1282,6 @@ export default function MyBookings() {
                                 </div>
 
                             </div>
-
-
-                            {/* ==========================================
-                                MODAL ACTIONS
-                            ========================================== */}
 
                             <div className="mt-6 flex gap-3">
 
